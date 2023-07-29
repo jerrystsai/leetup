@@ -9,6 +9,7 @@ router.get("/csrf/restore", (req, res) => {
   });
 });
 
+// Test router
 router.post('/test', function(req, res) {
   res.json({ requestBody: req.body });
 });
