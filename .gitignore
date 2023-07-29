@@ -1,3 +1,8 @@
+# Database
+.DS_Store
+*.db
+build
+
 # Logs
 logs
 *.log
