@@ -42,10 +42,14 @@ app.use(
   })
 );
 
-
 // Routes
+const routes = require('./routes');
 
+// ...
+
+app.use(routes); // Connect all the routes
 
 // Error-handling middleware
 
 // Exports
+module.exports = app;
