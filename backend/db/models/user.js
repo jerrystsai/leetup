@@ -3,6 +3,14 @@ const { Model, Validator } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
+    toSafe() {
+      return {
+        id: this.id,
+        username: this.username,
+        email: this.email
+      }
+    }
+
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.

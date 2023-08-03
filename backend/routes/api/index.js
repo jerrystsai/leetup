@@ -1,12 +1,19 @@
 const router = require('express').Router();
+const sessionRouter = require('./session.js');
+const usersRouter = require('./users.js');
+
 const { User } = require('../../db/models');
 const { setTokenCookie, restoreUser, requireAuth } = require('../../utils/auth.js');
+
+
 
 // Connect restoreUser middleware to the API router
   // If current user session is valid, set req.user to the user in the database
   // If current user session isnot valid, set req.user to null
 router.use(restoreUser);
 
+router.use('/session', sessionRouter);
+router.use('/users', usersRouter);
 
 
 // Add a XSRF-TOKEN cookie
