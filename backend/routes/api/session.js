@@ -11,6 +11,17 @@ const router = express.Router();
 
 // Routes
 
+// Restore session user
+router.get('/', (req, res) => {
+  const { user } = req;
+  if (user) {
+    const safeUser = user.toSafe();
+    return res.json({
+      user: safeUser
+    });
+  } else return res.json({ user: null });
+});
+
 router.post('/', async (req, res, next) => {
   const { credential, password } = req.body;
 
