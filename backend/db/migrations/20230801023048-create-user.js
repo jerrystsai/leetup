@@ -28,7 +28,8 @@ module.exports = {
         type: Sequelize.STRING(30)
       },
       email: {
-        type: Sequelize.STRING(256)
+        type: Sequelize.STRING(256),
+        unique: true
       },
       hashedPassword: {
         type: Sequelize.STRING,
