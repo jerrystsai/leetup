@@ -7,7 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       return {
         id: this.id,
         username: this.username,
-        email: this.email
+        email: this.email,
+        firstName: this.firstName,
+        lastName: this.lastName
       }
     }
 
