@@ -1,0 +1,32 @@
+{
+  "name": "leetup",
+  "version": "1.0.0",
+  "description": "Meetup clone",
+  "main": "index.js",
+  "dependencies": {
+    "express-validator": "^7.0.1",
+    "lodash": "^4.17.21",
+    "validator": "^13.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "npm run --prefix backend build",
+    "dev:backend": "npm install --prefix backend start",
+    "install": "npm --prefix backend install backend",
+    "sequelize": "npm run --prefix backend sequelize",
+    "sequelize-cli": "npm run --prefix backend sequelize-cli",
+    "start": "npm start --prefix backend",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerrystsai/leetup.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jerrystsai/leetup/issues"
+  },
+  "homepage": "https://github.com/jerrystsai/leetup#readme"
+}
