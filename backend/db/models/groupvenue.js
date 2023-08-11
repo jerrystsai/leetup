@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GroupVenue.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     groupId: DataTypes.INTEGER,
     venueId: DataTypes.INTEGER
   }, {

@@ -26,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Event.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     groupId: DataTypes.INTEGER,
     venueId: DataTypes.INTEGER,
     name: DataTypes.STRING,

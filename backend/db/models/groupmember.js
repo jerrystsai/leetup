@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GroupMember.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     groupId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
     status: DataTypes.ENUM
