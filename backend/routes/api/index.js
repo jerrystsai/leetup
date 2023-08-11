@@ -30,25 +30,25 @@ router.get("/csrf/restore", (req, res) => {
 //
 
 // Test set token cookie
-router.get('/set-token-cookie', async (_req, res) => {
-  const user = await User.findOne({
-    where: {
-      username: 'Demo-lition'
-    }
-  });
-  setTokenCookie(res, user);
-  return res.json({ user: user });
-});
+// router.get('/set-token-cookie', async (_req, res) => {
+//   const user = await User.findOne({
+//     where: {
+//       username: 'Demo-lition'
+//     }
+//   });
+//   setTokenCookie(res, user);
+//   return res.json({ user: user });
+// });
 
 // Test restore user
-router.get('/restore-user', (req, res) => {
-  return res.json(req.user);
-});
+// router.get('/restore-user', (req, res) => {
+//   return res.json(req.user);
+// });
 
 // Test require auth
-router.get('/require-auth', requireAuth, (req, res) => {
-  return res.json(req.user);
-});
+// router.get('/require-auth', requireAuth, (req, res) => {
+//   return res.json(req.user);
+// });
 
 
 // Test router
