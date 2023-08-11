@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     groupId: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
-    status: DataTypes.ENUM
+    status: DataTypes.ENUM('co-host', 'member', 'pending')
   }, {
     sequelize,
     modelName: 'GroupMember',
