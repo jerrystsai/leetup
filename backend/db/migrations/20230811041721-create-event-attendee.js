@@ -26,9 +26,7 @@ module.exports = {
       },
       status: {
         type: Sequelize.ENUM('attending', 'waitlist', 'pending'),
-        validate: {
-          isIn: [['attending', 'waitlist', 'pending']]
-        }
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

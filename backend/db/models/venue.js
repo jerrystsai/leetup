@@ -24,11 +24,38 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Venue.init({
-    address: DataTypes.STRING,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING,
-    lat: DataTypes.DECIMAL,
-    long: DataTypes.DECIMAL
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    city: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    state: {
+      type: DataTypes.STRING(30),
+      allowNull: false
+    },
+    lat: {
+      type: DataTypes.DECIMAL,
+      validate: {
+        isDecimal: {
+          msg: "Latitude is not valid"
+        },
+        min: -90,
+        max: 90
+      }
+    },
+    long: {
+      type: DataTypes.DECIMAL,
+      validate: {
+        isDecimal: {
+          msg: "Latitude is not valid"
+        },
+        min: -180,
+        max: 180
+      }
+    }
   }, {
     sequelize,
     modelName: 'Venue',

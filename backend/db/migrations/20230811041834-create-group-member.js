@@ -27,9 +27,6 @@ module.exports = {
       status: {
         type: Sequelize.ENUM('co-host', 'member', 'pending'),
         allowNull: false,
-        validate: {
-          isIn: [['co-host', 'member', 'pending']]
-        }
       },
       createdAt: {
         allowNull: false,

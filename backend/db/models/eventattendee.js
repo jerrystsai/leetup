@@ -20,9 +20,21 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    eventId: DataTypes.INTEGER,
-    userId: DataTypes.INTEGER,
-    status: DataTypes.ENUM('attending', 'waitlist', 'pending')
+    eventId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('attending', 'waitlist', 'pending'),
+      allowNull: false,
+      validate: {
+        isIn: [['attending', 'waitlist', 'pending']]
+      }
+    }
   }, {
     sequelize,
     modelName: 'EventAttendee',

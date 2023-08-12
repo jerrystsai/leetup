@@ -25,59 +25,29 @@ module.exports = {
         allowNull: false
       },
       name: {
-        type: Sequelize.STRING(256),
-        validate: {
-          len: [5,256]
-        }
+        type: Sequelize.STRING(255),
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(255),
         allowNull: false
       },
       type: {
         type: Sequelize.ENUM('Online', 'In Person'),
-        validate: {
-          isIn: [['Online', 'In Person']]
-        }
+        allowNull: false,
       },
       capacity: {
         type: Sequelize.INTEGER,
-        validate: {
-          isInt: {
-            msg: "Capacity must be an integer"
-          }
-        }
       },
       price: {
         type: Sequelize.DECIMAL,
-        validate: {
-          isDecimal: {
-            msg: "Price is invalid"
-          }
-        }
       },
       startDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        validate: {
-          startDateAfterNow(value) {
-            const now = new Date();
-            if (value < now) {
-              throw new Error("Start date must be in the future")
-            }
-          }
-        }
       },
       endDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        validate: {
-          endDateAfterStartDate(value) {
-            if (value < this.startDate) {
-              throw new Error("End date is less than start date")
-            }
-          }
-        }
       },
       createdAt: {
         allowNull: false,

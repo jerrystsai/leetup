@@ -30,16 +30,11 @@ module.exports = {
         allowNull: false
       },
       email: {
-        type: Sequelize.STRING(256),
+        type: Sequelize.STRING(255),
         unique: true,
-        validate: {
-          isEmail: {
-            msg: "Invalid email"
-          }
-        }
       },
       hashedPassword: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING.BINARY,
         allowNull: false
       },
       createdAt: {

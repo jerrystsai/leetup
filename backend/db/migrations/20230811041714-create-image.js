@@ -19,7 +19,6 @@ module.exports = {
       url: {
         type: Sequelize.STRING(500),
         allowNull: false,
-        isUrl: true
       },
       preview: {
         type: Sequelize.BOOLEAN,
@@ -33,9 +32,6 @@ module.exports = {
       imageableType: {
         type: Sequelize.ENUM('Event', 'Group'),
         allowNull: false,
-        validate: {
-          isIn: [['Event', 'Group']]
-        }
       },
       createdAt: {
         allowNull: false,

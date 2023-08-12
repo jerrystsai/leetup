@@ -32,15 +32,72 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    groupId: DataTypes.INTEGER,
-    venueId: DataTypes.INTEGER,
-    name: DataTypes.STRING,
-    description: DataTypes.STRING,
-    type: DataTypes.ENUM('Online', 'In Person'),
-    capacity: DataTypes.INTEGER,
-    price: DataTypes.DECIMAL,
-    startDate: DataTypes.DATE,
-    endDate: DataTypes.DATE
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    venueId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    name: {
+      type: DataTypes.STRING(255),
+      validate: {
+        len: [5,255]
+      }
+    },
+    description: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM('Online', 'In Person'),
+      allowNull: false,
+      validate: {
+        isIn: [['Online', 'In Person']]
+      }
+    },
+    capacity: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isInt: {
+          msg: "Capacity must be an integer"
+        },
+        min: 1,
+      }
+    },
+    price: {
+      type: DataTypes.DECIMAL,
+      validate: {
+        isDecimal: {
+          msg: "Price is invalid"
+        },
+        min: 0,
+      },
+    },
+    startDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        startDateAfterNow(value) {
+          const now = new Date();
+          if (value < now) {
+            throw new Error("Start date must be in the future");
+          }
+        }
+      }
+    },
+    endDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        endDateAfterStartDate(value) {
+          if (value < this.startdate) {
+            throw new Error("End date is less than start date");
+          }
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'Event',

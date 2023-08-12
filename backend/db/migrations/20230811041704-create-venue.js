@@ -17,7 +17,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       address: {
-        type: Sequelize.STRING(256),
+        type: Sequelize.STRING(255),
         allowNull: false
       },
       city: {
@@ -30,23 +30,9 @@ module.exports = {
       },
       lat: {
         type: Sequelize.DECIMAL,
-        validate: {
-          isDecimal: {
-            msg: "Latitude is not valid"
-          },
-          min: -90,
-          max: 90
-        }
       },
       long: {
         type: Sequelize.DECIMAL,
-        validate: {
-          isDecimal: {
-            msg: "Latitude is not valid"
-          },
-          min: -180,
-          max: 180
-        }
       },
       createdAt: {
         allowNull: false,

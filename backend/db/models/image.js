@@ -22,10 +22,31 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Image.init({
-    url: DataTypes.STRING,
-    preview: DataTypes.BOOLEAN,
-    imageableId: DataTypes.INTEGER,
-    imageableType: DataTypes.ENUM('Event', 'Group')
+    url: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+      validate: {
+        isUrl: {
+          msg: "Url must be a valid url"
+        }
+      }
+    },
+    preview: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    imageableId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    imageableType: {
+      type: DataTypes.ENUM('Event', 'Group'),
+      allowNull: false,
+      validate: {
+        isIn: [['Event', 'Group']]
+      }
+    }
   }, {
     sequelize,
     modelName: 'Image',

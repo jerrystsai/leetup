@@ -20,8 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    groupId: DataTypes.INTEGER,
-    venueId: DataTypes.INTEGER
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    venueId: {
+      type:  DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'GroupVenue',

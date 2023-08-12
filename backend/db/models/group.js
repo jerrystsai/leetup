@@ -39,13 +39,43 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Group.init({
-    organizerId: DataTypes.INTEGER,
-    name: DataTypes.STRING,
-    about: DataTypes.STRING,
-    type: DataTypes.ENUM('Online', 'In person'),
-    private: DataTypes.BOOLEAN,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING
+    organizerId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    name: {
+      type: DataTypes.STRING(60),
+      allowNull: false,
+      validate: {
+        len: [1,60]
+      },
+    },
+    about: {
+      type: DataTypes.STRING(255),
+      validate: {
+        len: [50,255]
+      },
+    },
+    type: {
+      type: DataTypes.ENUM('Online', 'In person'),
+      allowNull: false,
+      validate: {
+        isIn: [['Online', 'In person']]
+      }
+    },
+    private: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    city: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    state: {
+      type: DataTypes.STRING(30),
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Group',

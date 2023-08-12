@@ -20,9 +20,21 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    groupId: DataTypes.INTEGER,
-    userId: DataTypes.INTEGER,
-    status: DataTypes.ENUM('co-host', 'member', 'pending')
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('co-host', 'member', 'pending'),
+      allowNull: false,
+      validate: {
+        isIn: [['co-host', 'member', 'pending']]
+      }
+    }
   }, {
     sequelize,
     modelName: 'GroupMember',
