@@ -17,31 +17,67 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       groupId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       venueId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(256),
+        validate: {
+          len: [5,256]
+        }
       },
       description: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       type: {
-        type: Sequelize.ENUM('Online', 'In Person')
+        type: Sequelize.ENUM('Online', 'In Person'),
+        validate: {
+          isIn: [['Online', 'In Person']]
+        }
       },
       capacity: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        validate: {
+          isInt: {
+            msg: "Capacity must be an integer"
+          }
+        }
       },
       price: {
-        type: Sequelize.DECIMAL
+        type: Sequelize.DECIMAL,
+        validate: {
+          isDecimal: {
+            msg: "Price is invalid"
+          }
+        }
       },
       startDate: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false,
+        validate: {
+          startDateAfterNow(value) {
+            const now = new Date();
+            if (value < now) {
+              throw new Error("Start date must be in the future")
+            }
+          }
+        }
       },
       endDate: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull: false,
+        validate: {
+          endDateAfterStartDate(value) {
+            if (value < this.startDate) {
+              throw new Error("End date is less than start date")
+            }
+          }
+        }
       },
       createdAt: {
         allowNull: false,

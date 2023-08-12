@@ -17,13 +17,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       eventId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       userId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       status: {
-        type: Sequelize.ENUM('attending', 'waitlist', 'pending')
+        type: Sequelize.ENUM('attending', 'waitlist', 'pending'),
+        validate: {
+          isIn: [['attending', 'waitlist', 'pending']]
+        }
       },
       createdAt: {
         allowNull: false,

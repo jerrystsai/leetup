@@ -17,20 +17,36 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       address: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(256),
         allowNull: false
       },
       city: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50),
+        allowNull: false
       },
       state: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(30),
+        allowNull: false
       },
       lat: {
-        type: Sequelize.DECIMAL
+        type: Sequelize.DECIMAL,
+        validate: {
+          isDecimal: {
+            msg: "Latitude is not valid"
+          },
+          min: -90,
+          max: 90
+        }
       },
       long: {
-        type: Sequelize.DECIMAL
+        type: Sequelize.DECIMAL,
+        validate: {
+          isDecimal: {
+            msg: "Latitude is not valid"
+          },
+          min: -180,
+          max: 180
+        }
       },
       createdAt: {
         allowNull: false,

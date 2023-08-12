@@ -17,16 +17,25 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       url: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(500),
+        allowNull: false,
+        isUrl: true
       },
       preview: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       },
       imageableId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       imageableType: {
-        type: Sequelize.ENUM('Event', 'Group')
+        type: Sequelize.ENUM('Event', 'Group'),
+        allowNull: false,
+        validate: {
+          isIn: [['Event', 'Group']]
+        }
       },
       createdAt: {
         allowNull: false,

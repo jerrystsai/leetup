@@ -21,22 +21,38 @@ module.exports = {
         allowNull: false
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60),
+        validate: {
+          len: [1,60]
+        },
+        allowNull: false,
+        unique: true
       },
       about: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(256),
+        validate: {
+          len: [50,256]
+        },
       },
       type: {
-        type: Sequelize.ENUM('Online', 'In person')
+        type: Sequelize.ENUM('Online', 'In person'),
+        allowNull: false,
+        validate: {
+          isIn: [['Online', 'In person']]
+        }
       },
       private: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
       },
       city: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50),
+        allowNull: false
       },
       state: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(30),
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
