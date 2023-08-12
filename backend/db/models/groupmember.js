@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GroupMember.init({
-    id: {
+    memberId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
