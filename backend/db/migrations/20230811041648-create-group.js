@@ -42,7 +42,7 @@ module.exports = {
         allowNull: false
       },
       state: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(2),
         allowNull: false
       },
       createdAt: {

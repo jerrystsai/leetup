@@ -33,8 +33,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     state: {
-      type: DataTypes.STRING(30),
-      allowNull: false
+      type: DataTypes.STRING(2),
+      allowNull: false,
+      validate: {
+        len: [2,2],
+        isUppercase: true
+      }
     },
     lat: {
       type: DataTypes.DECIMAL,

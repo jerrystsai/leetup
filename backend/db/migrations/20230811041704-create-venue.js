@@ -6,6 +6,7 @@ let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;
 }
+options.tableName = 'Venues';
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -25,7 +26,7 @@ module.exports = {
         allowNull: false
       },
       state: {
-        type: Sequelize.STRING(30),
+        type: Sequelize.STRING(2),
         allowNull: false
       },
       lat: {

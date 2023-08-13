@@ -1,5 +1,4 @@
 'use strict';
-const bcrypt = require("bcryptjs");
 
 /** @type {import('sequelize-cli').Migration} */
 
@@ -7,7 +6,7 @@ let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;
 }
-options.tableName = 'Users';
+options.tableName = 'Venues';
 
 module.exports = {
   async up (queryInterface, Sequelize) {
@@ -22,32 +21,32 @@ module.exports = {
     */
    return queryInterface.bulkInsert(options, [
       {
-        email: 'j@jerrytsai.com',
-        username: 'jerrytsai',
-        firstName: 'Jerry',
-        lastName: 'Tsai',
-        hashedPassword: bcrypt.hashSync('doglover')
+        address: '111 S. Figueroa St.',
+        city: 'Los Angeles',
+        state: 'CA',
+        lat: 34.04323086215862,
+        long: -118.26714681164798
       },
       {
-        email: 'demo@user.io',
-        username: 'Demo-lition',
-        firstName: 'Demo',
-        lastName: 'Lition',
-        hashedPassword: bcrypt.hashSync('password')
+        address: '44 Montgomery St.',
+        city: 'San Francisco',
+        state: 'CA',
+        lat: 37.78975651746192,
+        long: -122.40190579372981
       },
       {
-        email: 'user1@user.io',
-        username: 'FakeUser1',
-        firstName: 'Fake',
-        lastName: 'User1',
-        hashedPassword: bcrypt.hashSync('password2')
+        address: '175 5th Ave.',
+        city: 'New York',
+        state: 'NY',
+        lat: 40.741198662256004,
+        long: -73.98963423038316
       },
       {
-        email: 'user2@user.io',
-        username: 'FakeUser2',
-        firstName: 'Fake',
-        lastName: 'User2',
-        hashedPassword: bcrypt.hashSync('password3')
+        address: '123 Disney Lane',
+        city: 'New York',
+        state: 'NY',
+        lat: 37.7645358,
+        long: -122.4730327
       }
    ], {});
   },
@@ -61,7 +60,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      username: { [Op.in]: ['Demo-lition', 'FakeUser1', 'FakeUser2'] }
+      address: { [Op.in]: ['111 S. Figueroa St.', '44 Montgomery St.', '175 5th Ave.', '123 Disney Lane'] }
     }, {});
   }
 };
