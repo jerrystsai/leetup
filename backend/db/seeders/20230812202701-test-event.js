@@ -37,6 +37,15 @@ module.exports = {
         type: 'In Person',
         startDate: '2021-11-19 20:00:00',
         endDate: '2021-11-19 22:00:00',
+      },
+      {
+        groupId: 2,
+        venueId: 3,
+        name: 'Dog Park',
+        description: 'Have dogs play together and have fun -- yay !!!!',
+        type: 'In Person',
+        startDate: '2021-11-22 20:00:00',
+        endDate: '2021-11-23 22:00:00',
       }
    ], {});
   },
@@ -50,7 +59,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      name: { [Op.in]: ['Tennis Group First Meet and Greet', 'Tennis Singles'] }
+      name: { [Op.in]: ['Tennis Group First Meet and Greet', 'Tennis Singles', 'Dog Park'] }
     }, {});
   }
 };

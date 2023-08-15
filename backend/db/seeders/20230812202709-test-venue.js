@@ -21,6 +21,7 @@ module.exports = {
     */
    return queryInterface.bulkInsert(options, [
       {
+        groupId: 1,
         address: '111 S. Figueroa St.',
         city: 'Los Angeles',
         state: 'CA',
@@ -28,13 +29,7 @@ module.exports = {
         long: -118.26714681164798
       },
       {
-        address: '44 Montgomery St.',
-        city: 'San Francisco',
-        state: 'CA',
-        lat: 37.78975651746192,
-        long: -122.40190579372981
-      },
-      {
+        groupId: 1,
         address: '175 5th Ave.',
         city: 'New York',
         state: 'NY',
@@ -42,6 +37,15 @@ module.exports = {
         long: -73.98963423038316
       },
       {
+        groupId: 2,
+        address: '44 Montgomery St.',
+        city: 'San Francisco',
+        state: 'CA',
+        lat: 37.78975651746192,
+        long: -122.40190579372981
+      },
+      {
+        groupId: 3,
         address: '123 Disney Lane',
         city: 'New York',
         state: 'NY',
@@ -60,7 +64,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      address: { [Op.in]: ['111 S. Figueroa St.', '44 Montgomery St.', '175 5th Ave.', '123 Disney Lane'] }
+      address: { [Op.in]: ['111 S. Figueroa St.', '175 5th Ave.', '44 Montgomery St.', '123 Disney Lane'] }
     }, {});
   }
 };

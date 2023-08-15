@@ -17,6 +17,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      groupId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       address: {
         type: Sequelize.STRING(255),
         allowNull: false
