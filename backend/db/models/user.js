@@ -20,11 +20,25 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasMany(models.Group, {
+        foreignkey: 'organizerId',
+        // onDelete: 'CASCADE', hooks: true
+      });
+      User.belongsToMany(models.Group, {
+        through: models.GroupMember,
+        foreignkey: 'userId',
+        otherKey: 'groupId'
+      });
+      User.belongsToMany(models.Event, {
+        through: models.EventAttendee,
+        foreignkey: 'userId',
+        otherKey: 'eventId'
+      });
     }
   }
   User.init({
     username: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(30),
       allowNull: false,
       unique: true,
       validate: {
@@ -37,24 +51,28 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     firstName: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(30),
+      allowNull: false,
       validate: {
         len: [1, 30]
       }
     },
     lastName: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(30),
+      allowNull: false,
       validate: {
         len: [1, 30]
       }
     },
     email: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
       validate: {
         len: [3, 256],
-        isEmail: true
+        isEmail: {
+          msg: "Invalid email"
+        }
       }
     },
     hashedPassword: {
