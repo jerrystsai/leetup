@@ -300,7 +300,7 @@ Returns all the groups.
 - Request
 
   - Method: `GET`
-  - URL: `/users/:userId/groups`
+  - URL: `/groups/me`
   - Body: none
 
 - Successful Response

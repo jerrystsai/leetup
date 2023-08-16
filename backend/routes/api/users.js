@@ -31,6 +31,7 @@ const validateSignup = [
 
 const router = express.Router();
 
+
 // Get the Current User
 router.get('/me', requireAuth, async (req, res) => {
 

@@ -12,14 +12,18 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Venue.belongsTo(models.Group, {
-        foreignkey: 'groupId',
+        foreignKey: 'groupId',
       });
       Venue.hasMany(models.Event, {
-        foreignkey: 'venueId',
+        foreignKey: 'venueId',
       });
     }
   }
   Venue.init({
+    groupId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     address: {
       type: DataTypes.STRING(255),
       allowNull: false
@@ -59,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Venue',
+    defaultScope: {
+      attributes: {
+        exclude: ["createdAt", "updatedAt"]
+      }
+    }
   });
   return Venue;
 };
