@@ -1,6 +1,6 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
+// /** @type {import('sequelize-cli').Migration} */
 
 let options = {};
 if (process.env.NODE_ENV === 'production') {
@@ -18,7 +18,8 @@ module.exports = {
       },
       organizerId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Users', key: 'id'}
       },
       name: {
         type: Sequelize.STRING(60),

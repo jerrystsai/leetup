@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('GroupMembers', {
-      memberId: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
@@ -18,11 +18,13 @@ module.exports = {
       },
       groupId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Groups' }
       },
       userId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Users' }
       },
       status: {
         type: Sequelize.ENUM('co-host', 'member', 'pending'),
