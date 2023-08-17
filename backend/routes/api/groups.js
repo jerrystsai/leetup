@@ -7,7 +7,7 @@ const { Op } = require("sequelize");
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const { handleValidationErrors } = require('../../utils/validation');
 
-const { User, Group, Image, Venue } = require('../../db/models');
+const { User, Group, Image, Venue, GroupMember } = require('../../db/models');
 const { sequelize } = require('../../db/models');
 
 const validateGroup = [
@@ -69,18 +69,38 @@ const router = express.Router();
 router.get('/:groupId/members', async (req, res) => {
   const { groupId } = req.params;
 
+  // const specificGroup = await User.findAll({
+  //   attributes: [],
+  //   where: {
+  //     '$`Members->GroupMember`.`groupId`$': Number(groupId)
+  //   },
+  //   include: [
+  //     {
+  //       model: Group,
+  //       as: 'Members'
+  //     }
+  //   ]
+  // });
+
   const specificGroup = await Group.findByPk(groupId, {
-    attributes: [],
+
     include: [
       {
         model: User,
-        // attributes: [],
-        as: 'Members'
+        as: 'Members',
+        attributes: ['id', 'firstName', 'lastName'],
+        through: {
+          attributes: ['status'],
+          as: 'Membership'
+        }
       }
-    ],
+    ]
   });
 
-  return specificGroup ? res.json(specificGroup): res.status(404).json({message: "Group couldn't be found"});
+ const yesthis = specificGroup['Members'];
+
+
+  return yesthis ? res.json({'Members': yesthis}): res.status(404).json({message: "Group couldn't be found"});
 });
 
 
