@@ -19,7 +19,8 @@ router.get('/me', requireAuth, async (req, res) => {
     include: [
       {
         model: User,
-        attributes: []
+        attributes: [],
+        as: 'Member'
       },
       {
         model: Image,
@@ -30,7 +31,7 @@ router.get('/me', requireAuth, async (req, res) => {
     ],
     attributes: {
       include: [
-        [sequelize.fn('COUNT', sequelize.col('Users.id')), 'numMembers'],
+        [sequelize.fn('COUNT', sequelize.col('`Member->GroupMember`.`id`')), 'numMembers'],
         [sequelize.col('Images.url'), 'previewUrl']
       ]
     },
@@ -38,12 +39,13 @@ router.get('/me', requireAuth, async (req, res) => {
     where: {
       [Op.or]: [
         { organizerId: req.user.id },
-        { '$Users.id$': req.user.id }
+        { '$`Member->GroupMember`.`id`$': req.user.id }
       ]
     }
   });
 
   return res.json({Groups: allGroupsForUser});
+
 });
 
 // Get details of a Group from an id
@@ -60,7 +62,8 @@ router.get('/:groupId', async (req, res) => {
       },
       {
         model: User,
-        attributes: []
+        attributes: [],
+        as: 'Member'
       },
       {
         model: Venue,
@@ -97,7 +100,8 @@ router.get('/', async (req, res) => {
     include: [
       {
         model: User,
-        attributes: []
+        attributes: [],
+        as: 'Member'
       },
       {
         model: Image,
@@ -108,7 +112,7 @@ router.get('/', async (req, res) => {
     ],
     attributes: {
       include: [
-        [sequelize.fn('COUNT', sequelize.col('Users.id')), 'numMembers'],
+        [sequelize.fn('COUNT', sequelize.col('`Member->GroupMember`.`id`')), 'numMembers'],
         [sequelize.col('Images.url'), 'previewUrl']
       ]
     },
