@@ -33,7 +33,8 @@ module.exports = (sequelize, DataTypes) => {
         constraints: false,
         scope: {
           imageableType: 'Group'
-        }
+        },
+        as: 'GroupImages'
       });
     }
   }
@@ -70,7 +71,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     city: {
       type: DataTypes.STRING(50),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [1,50]
+      }
     },
     state: {
       type: DataTypes.STRING(2),

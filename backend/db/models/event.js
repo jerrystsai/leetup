@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
         constraints: false,
         scope: {
           imageableType: 'Event'
-        }
+        },
+        as: 'EventImages'
       });
     }
   }

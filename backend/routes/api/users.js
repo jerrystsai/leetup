@@ -36,7 +36,7 @@ const router = express.Router();
 router.get('/me', requireAuth, async (req, res) => {
 
   const { user } = req;
-  console.log(user);
+  // console.log(user);
   if (user) {
     const safeUser = user.toSafe();
     return res.json({
