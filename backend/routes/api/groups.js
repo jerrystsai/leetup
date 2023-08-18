@@ -68,41 +68,99 @@ const router = express.Router();
 // Get details of a Group from an id
 router.get('/:groupId/members', async (req, res) => {
   const { groupId } = req.params;
+  const userId = +req.user.id;
 
-  // const specificGroup = await User.findAll({
-  //   attributes: [],
-  //   where: {
-  //     '$`Members->GroupMember`.`groupId`$': Number(groupId)
-  //   },
-  //   include: [
-  //     {
-  //       model: Group,
-  //       as: 'Members'
-  //     }
-  //   ]
-  // });
-
-  const specificGroup = await Group.findByPk(groupId, {
-
-    include: [
-      {
-        model: User,
-        as: 'Members',
-        attributes: ['id', 'firstName', 'lastName'],
-        through: {
-          attributes: ['status'],
-          as: 'Membership'
-        }
-      }
-    ]
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
   });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
 
- const yesthis = specificGroup['Members'];
+  if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    const membersOfSpecificGroup = await Group.findByPk(groupId, {
+      attributes: [],
+      include: [
+        {
+          model: User,
+          as: 'Members',
+          attributes: ['id', 'firstName', 'lastName'],
+          through: {
+            attributes: ['status'],
+            as: 'Membership',
+            where: { [Op.not]: {status: 'pending'} }
+          },
+        }
+      ]
+    });
 
+    return membersOfSpecificGroup ? res.json(membersOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
+  } else {
+    const membersOfSpecificGroup = await Group.findByPk(groupId, {
+      attributes: [],
+      include: [
+        {
+          model: User,
+          as: 'Members',
+          attributes: ['id', 'firstName', 'lastName'],
+          through: {
+            attributes: ['status'],
+            as: 'Membership'
+          }
+        }
+      ]
+    });
 
-  return yesthis ? res.json({'Members': yesthis}): res.status(404).json({message: "Group couldn't be found"});
+    return membersOfSpecificGroup ? res.json(membersOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
+  }
 });
 
+router.get('/:groupId/venues', requireAuth, async (req, res) => {
+  const { groupId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+  if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const venuesOfSpecificGroup = await Group.findByPk(groupId, {
+      attributes: [],
+      include: [
+        {
+          model: Venue,
+          // attributes: ['id', 'firstName', 'lastName'],
+        }
+      ]
+    });
+
+    return venuesOfSpecificGroup ? res.json(venuesOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
+  }
+
+});
 
 // Add an Image to a Group based on the Group's id
 router.post('/:groupId/images', requireAuth, validateImage, async (req, res) => {
@@ -119,7 +177,7 @@ router.post('/:groupId/images', requireAuth, validateImage, async (req, res) => 
       message: "Group couldn't be found"
     });
   } else if (userId !== specificGroup.organizerId) {
-    res.status(404).json({
+    res.status(403).json({
       message: "Forbidden"
     });
   } else {
@@ -224,7 +282,7 @@ router.put('/:groupId', requireAuth, validateGroup, async (req, res) => {
       message: "Group couldn't be found"
     });
   } else if (userId !== specificGroup.organizerId) {
-    res.status(404).json({
+    res.status(403).json({
       message: "Forbidden"
     });
   } else {
@@ -248,7 +306,7 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
       message: "Group couldn't be found"
     });
   } else if (userId !== specificGroup.organizerId) {
-    res.status(404).json({
+    res.status(403).json({
       message: "Forbidden"
     });
   } else {
