@@ -133,7 +133,6 @@ const validateImage = [
 
 const validateGroupId = [
   check('groupId')
-    .exists({ checkFalsy: true })
     .isInt({min: 1, allow_leading_zeroes: false})
     .withMessage("Invalid group number"),
   handleValidationErrors

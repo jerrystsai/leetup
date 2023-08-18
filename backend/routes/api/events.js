@@ -24,28 +24,28 @@ const router = express.Router();
 //
 
 // Edit an Event specified by its id
-router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
-  const { eventId } = req.params;
-  const userId = +req.user.id;
-  const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
-  // const clue = endDate.toDateTime();
-  console.log('price', typeof price);
-  console.log('startDate', typeof startDate);
-  console.log('endDate', typeof endDate);
-  // console.log('clue', clue);
+// router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
+//   const { eventId } = req.params;
+//   const userId = +req.user.id;
+//   const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
+//   // const clue = endDate.toDateTime();
+//   console.log('price', typeof price);
+//   console.log('startDate', typeof startDate);
+//   console.log('endDate', typeof endDate);
+//   // console.log('clue', clue);
 
-  const specificEvent = await Event.findByPk(eventId);
-  console.log(specificEvent);
-  const endDated = specificEvent.endDate;
-  const boundary = new Date('2021-11-19 15:00:00');
-  console.log('endDated', typeof endDated);
-  console.log('endDated', endDated instanceof Date);
-  console.log('endDated greater', endDated > boundary);
-  console.log('endDated less', endDated < boundary);
-  console.log('boundary', boundary);
-  console.log('endDated', endDated);
+//   const specificEvent = await Event.findByPk(eventId);
+//   console.log(specificEvent);
+//   const endDated = specificEvent.endDate;
+//   const boundary = new Date('2021-11-19 15:00:00');
+//   console.log('endDated', typeof endDated);
+//   console.log('endDated', endDated instanceof Date);
+//   console.log('endDated greater', endDated > boundary);
+//   console.log('endDated less', endDated < boundary);
+//   console.log('boundary', boundary);
+//   console.log('endDated', endDated);
 
-  res.json({here: "here"})
+//   res.json({here: "here"})
   // const specificVenue = await Venue.findByPk(venueId);
 
   // if (!specificVenue) {
@@ -79,7 +79,7 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
   //     res.status(200).json(updatedVenueConfirmed);
   //   }
   // }
-});
+// });
 
 
 // Edit a Venue specified by its id
@@ -351,6 +351,47 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
 
 //   return res.json({Groups: allGroups});
 // });
+
+
+// Get all Events
+router.get('/', async (req, res) => {
+  const allEvents = await Event.findAll({
+  include: [
+      {
+        model: User,
+        attributes: [],
+      },
+      {
+        model: Image,
+        attributes: [],
+        where: { preview: true },
+        required: false,
+        as: 'EventImages'
+      },
+      {
+        model: Group,
+        attributes: ['id', 'name', 'city', 'state'],
+        // as: 'Members'
+      },
+      {
+        model: Venue,
+        attributes: ['id', 'city', 'state'],
+        // as: 'Members'
+      }
+    ],
+    attributes: {
+      include: [
+        [sequelize.fn('COUNT', sequelize.col('`Users->EventAttendee`.`id`')), 'numAttending'],
+        [sequelize.col('EventImages.url'), 'previewImage']
+      ],
+      exclude: ['description', 'capacity', 'price']
+    },
+    group: ['Event.id']
+  });
+
+  return res.json({Events: allEvents});
+});
+
 
 // // Create a Group
 // router.post('/', requireAuth, validateGroup, async (req, res) => {
