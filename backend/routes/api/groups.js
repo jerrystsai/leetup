@@ -38,6 +38,28 @@ const validateGroup = [
   handleValidationErrors
 ];
 
+const validateVenue = [
+  check('address')
+    .isString()
+    .withMessage('Address must be a string')
+    .isLength({ min: 1, max: 255})
+    .withMessage('Address must be at least 1 character and less than 256 characters'),
+  check('city')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters'),
+  check('state')
+    .isLength({ min: 2, max: 2 })
+    .withMessage('State must be exactly 2 uppercase characters')
+    .isUppercase()
+    .withMessage('State must be exactly 2 uppercase characters'),
+  check('latitude')
+    .isLength({ min: 2, max: 2 })
+    .withMessage('State must be exactly 2 uppercase characters')
+    .isUppercase()
+    .withMessage('State must be exactly 2 uppercase characters'),
+  handleValidationErrors
+];
+
 const validateImage = [
   check('url')
     .exists({ checkFalsy: true })
@@ -123,7 +145,47 @@ router.get('/:groupId/members', async (req, res) => {
   }
 });
 
+// Get All Venues for a Group specified by its id
 router.get('/:groupId/venues', requireAuth, async (req, res) => {
+  const { groupId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+  if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const venuesOfSpecificGroup = await Group.findByPk(groupId, {
+      attributes: [],
+      include: [
+        {
+          model: Venue,
+          // attributes: ['id', 'firstName', 'lastName'],
+        }
+      ]
+    });
+
+    return venuesOfSpecificGroup ? res.json(venuesOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
+  }
+});
+
+// Create a new Venue for a Group specified by its id
+router.post('/:groupId/venues', requireAuth, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
 

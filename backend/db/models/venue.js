@@ -30,7 +30,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     city: {
       type: DataTypes.STRING(50),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [2, 50]
+      }
     },
     state: {
       type: DataTypes.STRING(2),
@@ -50,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
         max: 90
       }
     },
-    long: {
+    lng: {
       type: DataTypes.DECIMAL,
       validate: {
         isDecimal: {
