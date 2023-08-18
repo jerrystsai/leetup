@@ -9,11 +9,12 @@ const {
   handleValidationErrors,
   validateGroup,
   validateVenue,
+  validateEvent,
   validateImage,
   validateGroupId
 } = require('../../utils/validation');
 
-const { User, Group, Image, Venue, GroupMember } = require('../../db/models');
+const { User, Group, Image, Venue, GroupMember, Event } = require('../../db/models');
 const { sequelize } = require('../../db/models');
 
 const router = express.Router();
@@ -119,6 +120,7 @@ router.get('/:groupId/venues', requireAuth, async (req, res) => {
   }
 });
 
+
 // Create a new Venue for a Group specified by its id
 router.post('/:groupId/venues', requireAuth, validateVenue, async (req, res) => {
   const { groupId } = req.params;
@@ -146,14 +148,45 @@ router.post('/:groupId/venues', requireAuth, validateVenue, async (req, res) => 
     });
   } else {
     const newVenue = await Venue.create({ groupId, address, city, state, lat, lng  });
-
-    console.log(newVenue.id);
     const newVenueConfirmed = await Venue.findByPk(newVenue.id, {
     });
 
     res.status(200).json(newVenueConfirmed);
   }
+});
 
+// Create a new Venue for a Group specified by its id
+router.post('/:groupId/events', requireAuth, validateEvent, async (req, res) => {
+  const { groupId } = req.params;
+  const userId = +req.user.id;
+  const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
+
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+  if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const newEvent = await Event.create({ groupId, venueId, name, type, capacity, price, description, startDate, endDate });
+    const newEventConfirmed = await Event.findByPk(newEvent.id, {
+    });
+
+    res.status(200).json(newEventConfirmed);
+  }
 });
 
 // Add an Image to a Group based on the Group's id

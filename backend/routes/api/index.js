@@ -3,6 +3,7 @@ const loginRouter = require('./login.js');
 const usersRouter = require('./users.js');
 const groupsRouter = require('./groups.js');
 const venuesRouter = require('./venues.js');
+const eventsRouter = require('./events.js');
 
 const { User } = require('../../db/models');
 const { setTokenCookie, restoreUser, requireAuth } = require('../../utils/auth.js');
@@ -18,6 +19,7 @@ router.use('/login', loginRouter);
 router.use('/users', usersRouter);
 router.use('/groups', groupsRouter);
 router.use('/venues', venuesRouter);
+router.use('/events', eventsRouter);
 
 
 // Add a XSRF-TOKEN cookie

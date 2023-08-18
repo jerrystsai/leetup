@@ -9,11 +9,12 @@ const {
   handleValidationErrors,
   validateGroup,
   validateVenue,
+  validateEvent,
   validateImage,
   validateGroupId
 } = require('../../utils/validation');
 
-const { User, Group, Image, Venue, GroupMember } = require('../../db/models');
+const { User, Group, Image, Venue, GroupMember, Event } = require('../../db/models');
 const { sequelize } = require('../../db/models');
 
 const router = express.Router();
@@ -22,46 +23,105 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
-// Edit a Venue specified by its id
-router.put('/:venueId', requireAuth, validateVenue, async (req, res) => {
-  const { venueId } = req.params;
+// Edit an Event specified by its id
+router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
+  const { eventId } = req.params;
   const userId = +req.user.id;
-  const { address, city, state, lat, lng } = req.body;
+  const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
+  // const clue = endDate.toDateTime();
+  console.log('price', typeof price);
+  console.log('startDate', typeof startDate);
+  console.log('endDate', typeof endDate);
+  // console.log('clue', clue);
 
-  const specificVenue = await Venue.findByPk(venueId);
+  const specificEvent = await Event.findByPk(eventId);
+  console.log(specificEvent);
+  const endDated = specificEvent.endDate;
+  const boundary = new Date('2021-11-19 15:00:00');
+  console.log('endDated', typeof endDated);
+  console.log('endDated', endDated instanceof Date);
+  console.log('endDated greater', endDated > boundary);
+  console.log('endDated less', endDated < boundary);
+  console.log('boundary', boundary);
+  console.log('endDated', endDated);
 
-  if (!specificVenue) {
-    res.status(404).json({
-      message: "Venue couldn't be found"
-    });
-  } else {
-    const groupIdOfSpecificVenue = specificVenue.groupId;
-    const selectedGroup = await Group.findByPk(groupIdOfSpecificVenue, {attributes: ['organizerId']});
-    const groupCohosts = await GroupMember.findAll({
-      attributes: ['userId'],
-      where: {
-        groupId: groupIdOfSpecificVenue,
-        status: 'co-host'
-      },
-      raw: true
-    });
-    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+  res.json({here: "here"})
+  // const specificVenue = await Venue.findByPk(venueId);
 
-    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
-      res.status(403).json({
-        message: "Forbidden"
-      });
-    } else {
-      const updatedVenue = await specificVenue.update(
-        { groupId: groupIdOfSpecificVenue, address, city, state, lat, lng }
-      );
-      const updatedVenueConfirmed = await Venue.findByPk(venueId, {
-      });
+  // if (!specificVenue) {
+  //   res.status(404).json({
+  //     message: "Venue couldn't be found"
+  //   });
+  // } else {
+  //   const groupIdOfSpecificVenue = specificVenue.groupId;
+  //   const selectedGroup = await Group.findByPk(groupIdOfSpecificVenue, {attributes: ['organizerId']});
+  //   const groupCohosts = await GroupMember.findAll({
+  //     attributes: ['userId'],
+  //     where: {
+  //       groupId: groupIdOfSpecificVenue,
+  //       status: 'co-host'
+  //     },
+  //     raw: true
+  //   });
+  //   const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
 
-      res.status(200).json(updatedVenueConfirmed);
-    }
-  }
+  //   if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+  //     res.status(403).json({
+  //       message: "Forbidden"
+  //     });
+  //   } else {
+  //     const updatedVenue = await specificVenue.update(
+  //       { groupId: groupIdOfSpecificVenue, address, city, state, lat, lng }
+  //     );
+  //     const updatedVenueConfirmed = await Venue.findByPk(venueId, {
+  //     });
+
+  //     res.status(200).json(updatedVenueConfirmed);
+  //   }
+  // }
 });
+
+
+// Edit a Venue specified by its id
+// router.put('/:venueId', requireAuth, validateVenue, async (req, res) => {
+//   const { venueId } = req.params;
+//   const userId = +req.user.id;
+//   const { address, city, state, lat, lng } = req.body;
+
+//   const specificVenue = await Venue.findByPk(venueId);
+
+//   if (!specificVenue) {
+//     res.status(404).json({
+//       message: "Venue couldn't be found"
+//     });
+//   } else {
+//     const groupIdOfSpecificVenue = specificVenue.groupId;
+//     const selectedGroup = await Group.findByPk(groupIdOfSpecificVenue, {attributes: ['organizerId']});
+//     const groupCohosts = await GroupMember.findAll({
+//       attributes: ['userId'],
+//       where: {
+//         groupId: groupIdOfSpecificVenue,
+//         status: 'co-host'
+//       },
+//       raw: true
+//     });
+//     const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+//     if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+//       res.status(403).json({
+//         message: "Forbidden"
+//       });
+//     } else {
+//       const updatedVenue = await specificVenue.update(
+//         { groupId: groupIdOfSpecificVenue, address, city, state, lat, lng }
+//       );
+//       const updatedVenueConfirmed = await Venue.findByPk(venueId, {
+//       });
+
+//       res.status(200).json(updatedVenueConfirmed);
+//     }
+//   }
+// });
 
 
 // Get All Venues for a Group specified by its id
