@@ -65,6 +65,31 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
+// Edit a Venue specified by its id
+router.put('/:groupId', requireAuth, validateGroup, async (req, res) => {
+  const { groupId } = req.params;
+  const userId = +req.user.id;
+
+  const specificGroup = await Group.findByPk(groupId);
+
+  if (!specificGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (userId !== specificGroup.organizerId) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const { name, about, type, private, city, state } = req.body;
+    const updatedGroup = await specificGroup.update(
+      { organizerId: userId, name, about, type, private, city, state }
+    );
+    res.status(200).json(updatedGroup);
+  }
+});
+
+
 // Get All Venues for a Group specified by its id
 
 // router.get('/:groupId/venues', requireAuth, async (req, res) => {
