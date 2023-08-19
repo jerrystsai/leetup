@@ -97,42 +97,66 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
       message: "Event couldn't be found"
     });
   } else {
-    const selectedUser = await Event.findByPk(eventId, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Members',
-          attributes: ['id', 'firstName', 'lastName'],
-          through: {
-            attributes: ['status'],
-            as: 'Membership'
-          },
-          where: {id: userId}
-        }
-      ]
-    });
-
-    if (selectedUser) {
-      const statusOfSelectedUser = selectedUser.Members[0].Membership.status;
-
-      if (statusOfSelectedUser === 'pending') {
-        res.status(400).json({
-          message: "Membership has already been requested"
-        });
-      } else if (statusOfSelectedUser === 'co-host' || statusOfSelectedUser === 'member') {
-        res.status(400).json({
-          message: "User is already a member of the event"
-        });
+    const groupId = selectedEvent.groupId;
+    const userGroupMembership = await GroupMember.findAll(
+      {where: {
+        [Op.and]: [
+          {groupId},
+          {userId},
+          { [Op.or]: [
+            {status: 'member'},
+            {status: 'co-host'}
+          ]}
+        ]}
       }
-    } else {
-      const newEventMember = await EventMember.create({ eventId, userId, status: 'pending' });
-      const newEventMemberConfirmed = await EventMember.findByPk(newEventMember.id, {
-        attributes: [['userId', 'memberId'], 'status']
+    );
+    console.log('--- userGroupMembership', userGroupMembership);
+
+    const userEventAttendance = await EventAttendee.findAll(
+      {where: {eventId, userId}}
+    );
+
+    if (userGroupMembership.length === 0) {
+      res.status(403).json({
+        message: "Forbidden"
       });
-      res.status(200).json(newEventMemberConfirmed);
+    } else {
+      if (userEventAttendance.length > 0) {
+        // console.log('--- userEventAttendanceStatus', userEventAttendance);
+
+        const userEventAttendanceStatus = userEventAttendance[0].status;
+        if (userEventAttendanceStatus === 'pending' || userEventAttendanceStatus === 'waitlist') {
+          res.status(400).json({
+            message: "Attendance has already been requested"
+          });
+        } else if (userEventAttendanceStatus === 'attending') {
+          res.status(400).json({
+            message: "User is already an attendee of the event"
+          });
+        }
+      } else {
+        console.log('--- HERE HERE');
+        const updateSelectedEventAttendee = await EventAttendee.create(
+          {
+            eventId,
+            userId,
+            status: 'pending'
+          }
+        );
+
+        const selectedEventAttendee = await EventAttendee.findAll({
+          attributes: ['userId', 'status'],
+          where: {
+            [Op.and]: [{eventId}, {userId}]
+          }
+        });
+
+        res.status(200).json(selectedEventAttendee);
+      }
     }
   }
+});
+
 
 // Add an Image to a Event based on the Event's id
 router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => {

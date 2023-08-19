@@ -32,7 +32,7 @@ module.exports = {
       },
       {
         eventId: 1,
-        userId: 4,
+        userId: 6,
         status: 'attending',
       },
       {
@@ -74,7 +74,6 @@ module.exports = {
     const selectEventAttendees = [
       {eventId: 1, userId: 1},
       {eventId: 1, userId: 2},
-      {eventId: 1, userId: 4},
       {eventId: 2, userId: 2},
       {eventId: 3, userId: 1},
       {eventId: 3, userId: 3},
