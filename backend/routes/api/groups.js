@@ -595,7 +595,7 @@ router.get('/', async (req, res) => {
       },
     attributes: {
       include: [
-        'Group.id', [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
+        'id', [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
       ]
     },
     group: ['Group.id']
