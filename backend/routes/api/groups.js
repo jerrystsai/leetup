@@ -584,24 +584,36 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
   }
 });
 
+// GroupMember group: ['groupId']
+
 // Get all Groups
 router.get('/', async (req, res) => {
   const allGroups = await Group.findAll({
-   include:
+    include: [
       {
         model: User,
-        attributes: [],
         as: 'Members'
       },
-    attributes: {
-      include: [
-        'id', [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
-      ]
-    },
-    group: ['Group.id']
-  })
+      {
+        model: Image,
+        attributes: ['url'],
+        where: { preview: true },
+        required: false,
+        as: 'GroupImages'
+      }
+    ],
+  });
 
-  return res.json({Groups: allGroups});
+  const allGroupsArray = allGroups.map(group => {
+    const groupData = group.dataValues;
+    groupData['numMembers'] = groupData['Members'].length;
+    groupData['previewImage'] = groupData['GroupImages'].length > 0 ? groupData.GroupImages[0]['url'] : null;
+    delete groupData['Members'];
+    delete groupData['GroupImages']
+    return groupData;
+  });
+
+  return res.json({Groups: allGroupsArray});
 });
 
 // Create a Group
