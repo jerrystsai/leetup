@@ -205,7 +205,7 @@ router.post('/:groupId/venues', requireAuth, validateVenue, async (req, res) => 
   }
 });
 
-// Create a new Venue for a Group specified by its id
+// Create an Event for a Group specified by its id
 router.post('/:groupId/events', requireAuth, validateEvent, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
