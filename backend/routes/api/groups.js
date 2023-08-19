@@ -591,10 +591,6 @@ router.get('/', async (req, res) => {
   const allGroups = await Group.findAll({
     include: [
       {
-        model: User,
-        as: 'Members'
-      },
-      {
         model: Image,
         attributes: ['url'],
         where: { preview: true },
@@ -606,9 +602,9 @@ router.get('/', async (req, res) => {
 
   const allGroupsArray = allGroups.map(group => {
     const groupData = group.dataValues;
-    groupData['numMembers'] = groupData['Members'].length;
+    // groupData['numMembers'] = groupData['Members'].length;
     groupData['previewImage'] = groupData['GroupImages'].length > 0 ? groupData.GroupImages[0]['url'] : null;
-    delete groupData['Members'];
+    // delete groupData['Members'];
     delete groupData['GroupImages']
     return groupData;
   });
