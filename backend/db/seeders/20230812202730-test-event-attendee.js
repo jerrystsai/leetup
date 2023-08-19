@@ -52,6 +52,11 @@ module.exports = {
       },
       {
         eventId: 4,
+        userId: 3,
+        status: 'pending',
+      },
+      {
+        eventId: 4,
         userId: 4,
         status: 'co-host',
       }
@@ -73,6 +78,7 @@ module.exports = {
       {eventId: 2, userId: 2},
       {eventId: 3, userId: 1},
       {eventId: 3, userId: 3},
+      {eventId: 4, userId: 3},
       {eventId: 4, userId: 4},
     ];
 

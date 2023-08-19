@@ -63,7 +63,7 @@ router.get('/:eventId/attendees', async (req, res) => {
     });
     const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
 
-    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    if (selectedGroup.organizerId === userId || groupCohostsArray.includes(userId)) {
       res.status(200).json(selectedEvent);
     } else {
       const selectedEventWithoutPending = await Event.findByPk(eventId, {
@@ -85,6 +85,54 @@ router.get('/:eventId/attendees', async (req, res) => {
   }
 });
 
+// Request to Attend an Event based on the Event's id
+router.post('/:eventId/attendees', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedEvent = await Event.findByPk(eventId);
+
+  if (!selectedEvent) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else {
+    const selectedUser = await Event.findByPk(eventId, {
+      attributes: [],
+      include: [
+        {
+          model: User,
+          as: 'Members',
+          attributes: ['id', 'firstName', 'lastName'],
+          through: {
+            attributes: ['status'],
+            as: 'Membership'
+          },
+          where: {id: userId}
+        }
+      ]
+    });
+
+    if (selectedUser) {
+      const statusOfSelectedUser = selectedUser.Members[0].Membership.status;
+
+      if (statusOfSelectedUser === 'pending') {
+        res.status(400).json({
+          message: "Membership has already been requested"
+        });
+      } else if (statusOfSelectedUser === 'co-host' || statusOfSelectedUser === 'member') {
+        res.status(400).json({
+          message: "User is already a member of the event"
+        });
+      }
+    } else {
+      const newEventMember = await EventMember.create({ eventId, userId, status: 'pending' });
+      const newEventMemberConfirmed = await EventMember.findByPk(newEventMember.id, {
+        attributes: [['userId', 'memberId'], 'status']
+      });
+      res.status(200).json(newEventMemberConfirmed);
+    }
+  }
 
 // Add an Image to a Event based on the Event's id
 router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => {

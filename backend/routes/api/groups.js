@@ -355,17 +355,6 @@ router.post('/:groupId/members', requireAuth, async (req, res) => {
       res.status(200).json(newGroupMemberConfirmed);
     }
   }
-  // // } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
-  //   res.status(403).json({
-  //     message: "Forbidden"
-  //   });
-  // } else {
-  //   const newMember = await Member.create({ groupId, address, city, state, lat, lng  });
-  //   const newMemberConfirmed = await Member.findByPk(newMember.id, {
-  //   });
-
-  //   res.status(200).json(newMemberConfirmed);
-  // }
 });
 
 
