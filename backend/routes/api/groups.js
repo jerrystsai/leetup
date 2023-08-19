@@ -164,7 +164,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
           }
         );
 
-        const selectedGroupMember = await GroupMember.findAll({
+        const selectedGroupMember = await GroupMember.findOne({
           attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
           where: {
             [Op.and]: [{groupId}, {userId: memberId}]
@@ -189,7 +189,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
           }
         );
 
-        const selectedGroupMember = await GroupMember.findAll({
+        const selectedGroupMember = await GroupMember.findOne({
           attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
           where: {
             [Op.and]: [{groupId}, {userId: memberId}]
@@ -202,7 +202,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
         (userId === selectedGroupOrganizerId || groupCohostsArray.includes(userId)) &&
         (groupStatusOfSelectedMember === status)
       ) {
-      const selectedGroupMember = await GroupMember.findAll({
+      const selectedGroupMember = await GroupMember.findOne({
         attributes: ['id', 'groupId', 'userId', 'status'],
         where: {
           [Op.and]: [{groupId}, {userId: memberId}]

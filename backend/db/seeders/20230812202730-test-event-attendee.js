@@ -58,7 +58,7 @@ module.exports = {
       {
         eventId: 4,
         userId: 4,
-        status: 'co-host',
+        status: 'attending',
       }
    ], {});
   },
