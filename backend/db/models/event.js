@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       Event.belongsToMany(models.User, {
         through: models.EventAttendee,
         foreignKey: 'eventId',
-        otherKey: 'userId'
+        otherKey: 'userId',
+        as: 'Attendees'
       });
       Event.hasMany(models.Image, {
         foreignKey: 'imageableId',

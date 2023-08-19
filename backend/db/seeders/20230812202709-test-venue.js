@@ -51,6 +51,14 @@ module.exports = {
         state: 'NY',
         lat: 37.7645358,
         lng: -122.4730327
+      },
+      {
+        groupId: 4,
+        address: '1600 Pennsylvania Avenue',
+        city: 'Washington',
+        state: 'DC',
+        lat: 38.897957,
+        lng: -38.897957
       }
    ], {});
   },
@@ -64,7 +72,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      address: { [Op.in]: ['111 S. Figueroa St.', '175 5th Ave.', '44 Montgomery St.', '123 Disney Lane'] }
+      address: { [Op.in]: ['111 S. Figueroa St.', '175 5th Ave.', '44 Montgomery St.', '123 Disney Lane', '1600 Pennsylvania Avenue'] }
     }, {});
   }
 };

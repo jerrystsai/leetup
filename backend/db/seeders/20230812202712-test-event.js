@@ -52,6 +52,17 @@ module.exports = {
         price: 1.20,
         startDate: '2021-11-22 20:00:00',
         endDate: '2021-11-23 22:00:00',
+      },
+      {
+        groupId: 4,
+        venueId: 5,
+        name: 'Presidential Inauguration',
+        description: 'See the president bark at dogs and play tennis while balancing the budget',
+        type: 'In Person',
+        capacity: 500,
+        price: 0,
+        startDate: '2024-01-20 12:00:00',
+        endDate: '2024-01-20 14:00:00',
       }
    ], {});
   },
@@ -65,7 +76,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      name: { [Op.in]: ['Tennis Group First Meet and Greet', 'Tennis Singles', 'Dog Park'] }
+      name: { [Op.in]: ['Tennis Group First Meet and Greet', 'Tennis Singles', 'Dog Park', 'Presidential Inauguration'] }
     }, {});
   }
 };

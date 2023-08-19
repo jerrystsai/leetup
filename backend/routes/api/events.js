@@ -23,49 +23,113 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
-// Add an Image to a Event based on the Event's id
-router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => {
+// Get all Attendees of an Event specified by its id
+router.get('/:eventId/attendees', async (req, res) => {
   const { eventId } = req.params;
-  const { url, preview } = req.body;
   const userId = +req.user.id;
 
-  const specificEvent = await Event.findByPk(eventId, {
-    attributes: ['groupId'],
+  const selectedEvent = await Event.findByPk(eventId, {
+    attributes: [],
     include: [
-      {
-        model: User,
-        attributes: ['id'],
-        through: {
-          attributes: [],
-          as: 'EventAttendees',
-          where: { status: 'attending' }
+        {
+          model: User,
+          as: 'Attendees',
+          through: {
+            attributes: ['status'],
+            as: 'Attendance'
+          }
         },
-      }
-    ]
+      ],
   });
 
-  if (!specificEvent) {
+  if (!selectedEvent) {
     res.status(404).json({
       message: "Event couldn't be found"
     });
   } else {
-    const specificEventUsers = specificEvent.toJSON()['Users'];
-    const specificEventUsersArray = specificEventUsers.map( attendeeObj => attendeeObj.id);
+    // const selectedEventAttendees = selectedEvent.toJSON()['Attendees'];
+    // const selectedEventAttendeessArray = selectedEventUsers.map( attendeeObj => attendeeObj.id);
+    const selectedEventGroupId = await Event.findByPk(eventId);
+    const groupIdOfSelectedEvent = selectedEventGroupId.groupId;
 
-    const groupIdOfSpecificEvent = specificEvent.groupId;
-
-    const selectedGroup = await Group.findByPk(groupIdOfSpecificEvent, {attributes: ['organizerId']});
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
     const groupCohosts = await GroupMember.findAll({
       attributes: ['userId'],
       where: {
-        groupId: groupIdOfSpecificEvent,
+        groupId: groupIdOfSelectedEvent,
         status: 'co-host'
       },
       raw: true
     });
     const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
 
-    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId) && !specificEventUsersArray.includes(userId)) {
+    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+      res.status(200).json(selectedEvent);
+    } else {
+      const selectedEventWithoutPending = await Event.findByPk(eventId, {
+        attributes: [],
+        include: [
+            {
+              model: User,
+              as: 'Attendees',
+              through: {
+                attributes: ['status'],
+                as: 'Attendance',
+                where: { [Op.not]: { status: 'pending' }}
+              }
+            },
+          ],
+      });
+      res.status(200).json(selectedEventWithoutPending);
+    }
+  }
+});
+
+
+// Add an Image to a Event based on the Event's id
+router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => {
+  const { eventId } = req.params;
+  const { url, preview } = req.body;
+  const userId = +req.user.id;
+
+  const selectedEvent = await Event.findByPk(eventId, {
+    attributes: ['groupId'],
+    include: [
+      {
+        model: User,
+        attributes: ['id'],
+        as: 'Attendees',
+        through: {
+          attributes: [],
+          as: 'Attendance',
+          where: { status: 'attending' }
+        },
+      }
+    ]
+  });
+
+  if (!selectedEvent) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else {
+    const selectedEventUsers = selectedEvent.toJSON()['Attendees'];
+    const selectedEventUsersArray = selectedEventUsers.map( attendeeObj => attendeeObj.id);
+
+    const groupIdOfSelectedEvent = selectedEvent.groupId;
+
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
+    const groupCohosts = await GroupMember.findAll({
+      attributes: ['userId'],
+      where: {
+        groupId: groupIdOfSelectedEvent,
+        status: 'co-host'
+      },
+      raw: true
+    });
+    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId) && !selectedEventUsersArray.includes(userId)) {
       res.status(403).json({
         message: "Forbidden"
       });
@@ -133,20 +197,20 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
   const { eventId } = req.params;
   const userId = +req.user.id;
 
-  const specificEvent = await Event.findByPk(eventId);
+  const selectedEvent = await Event.findByPk(eventId);
 
-  if (!specificEvent) {
+  if (!selectedEvent) {
     res.status(404).json({
       message: "Event couldn't be found"
     });
   } else {
-    const groupIdOfSpecificEvent = specificEvent.groupId;
+    const groupIdOfSelectedEvent = selectedEvent.groupId;
 
-    const selectedGroup = await Group.findByPk(groupIdOfSpecificEvent, {attributes: ['organizerId']});
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
     const groupCohosts = await GroupMember.findAll({
       attributes: ['userId'],
       where: {
-        groupId: groupIdOfSpecificEvent,
+        groupId: groupIdOfSelectedEvent,
         status: 'co-host'
       },
       raw: true
@@ -159,14 +223,14 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
       });
     } else {
       const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
-      const specificVenue = await Venue.findByPk(venueId);
+      const selectedVenue = await Venue.findByPk(venueId);
 
-      if (!specificVenue && venueId !== null) {
+      if (!selectedVenue && venueId !== null) {
         res.status(404).json({
           message: "Venue couldn't be found"
         });
       } else {
-        const updatedEvent = await specificEvent.update(
+        const updatedEvent = await selectedEvent.update(
           { venueId, name, type, capacity, price, description, startDate, endDate }
         );
 
