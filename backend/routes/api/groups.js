@@ -589,11 +589,6 @@ router.get('/', async (req, res) => {
   const allGroups = await Group.findAll({
     include: [
       {
-        model: User,
-        attributes: [],
-        as: 'Members'
-      },
-      {
         model: Image,
         attributes: [],
         where: { preview: true },
@@ -603,7 +598,6 @@ router.get('/', async (req, res) => {
     ],
     attributes: {
       include: [
-        [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
         [sequelize.col('GroupImages.url'), 'previewUrl']
       ]
     },
