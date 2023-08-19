@@ -587,22 +587,19 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
 // Get all Groups
 router.get('/', async (req, res) => {
   const allGroups = await Group.findAll({
-    include: [
+   include:
       {
-        model: Image,
+        model: User,
         attributes: [],
-        where: { preview: true },
-        required: false,
-        as: 'GroupImages'
-      }
-    ],
+        as: 'Members'
+      },
     attributes: {
       include: [
-        [sequelize.col('GroupImages.url'), 'previewUrl']
+        'Group.id', [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
       ]
     },
     group: ['Group.id']
-  });
+  })
 
   return res.json({Groups: allGroups});
 });
