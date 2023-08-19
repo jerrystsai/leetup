@@ -23,12 +23,17 @@ module.exports = {
       {
         eventId: 1,
         userId: 1,
-        status: 'attending',
+        status: 'pending',
       },
       {
         eventId: 1,
         userId: 2,
         status: 'waitlist',
+      },
+      {
+        eventId: 1,
+        userId: 6,
+        status: 'attending',
       },
       {
         eventId: 2,
@@ -44,6 +49,16 @@ module.exports = {
         eventId: 3,
         userId: 3,
         status: 'pending',
+      },
+      {
+        eventId: 4,
+        userId: 3,
+        status: 'pending',
+      },
+      {
+        eventId: 4,
+        userId: 4,
+        status: 'co-host',
       }
    ], {});
   },
@@ -62,6 +77,8 @@ module.exports = {
       {eventId: 2, userId: 2},
       {eventId: 3, userId: 1},
       {eventId: 3, userId: 3},
+      {eventId: 4, userId: 3},
+      {eventId: 4, userId: 4},
     ];
 
     return queryInterface.bulkDelete(options, {

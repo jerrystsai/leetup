@@ -28,7 +28,19 @@ module.exports = {
       },
       {
         url: 'https://www.example.com/url2.jpg',
+        preview: false,
+        imageableId: 1,
+        imageableType: 'Group',
+      },
+      {
+        url: 'https://www.example.com/url3.jpg',
         preview: true,
+        imageableId: 1,
+        imageableType: 'Event',
+      },
+      {
+        url: 'https://www.example.com/url4.jpg',
+        preview: false,
         imageableId: 1,
         imageableType: 'Event',
       },
@@ -44,7 +56,8 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      url: { [Op.in]: ['https://www.example.com/url1.jpg', 'https://www.example.com/url2.jpg'] }
+      url: { [Op.in]: ['https://www.example.com/url1.jpg', 'https://www.example.com/url2.jpg',
+                       'https://www.example.com/url3.jpg', 'https://www.example.com/url4.jpg'] }
     }, {});
   }
 };

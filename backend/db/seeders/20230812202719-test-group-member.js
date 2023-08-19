@@ -31,6 +31,21 @@ module.exports = {
         status: 'co-host',
       },
       {
+        groupId: 1,
+        userId: 4,
+        status: 'pending',
+      },
+      {
+        groupId: 1,
+        userId: 5,
+        status: 'member',
+      },
+      {
+        groupId: 1,
+        userId: 6,
+        status: 'member',
+      },
+      {
         groupId: 2,
         userId: 1,
         status: 'co-host',
@@ -64,6 +79,9 @@ module.exports = {
     const selectGroupMembers = [
       {groupId: 1, userId: 1},
       {groupId: 1, userId: 2},
+      {groupId: 1, userId: 4},
+      {groupId: 1, userId: 5},
+      {groupId: 1, userId: 6},
       {groupId: 2, userId: 1},
       {groupId: 3, userId: 3},
       {groupId: 3, userId: 4},

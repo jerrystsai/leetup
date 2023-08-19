@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GroupMember.init({
-    memberId: {
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
@@ -38,6 +38,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'GroupMember',
+    defaultScope: {
+      attributes: {
+        exclude: ["id", "groupId", "userId", "createdAt", "updatedAt"]
+      }
+    }
   });
   return GroupMember;
 };

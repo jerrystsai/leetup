@@ -26,7 +26,7 @@ module.exports = {
         city: 'Los Angeles',
         state: 'CA',
         lat: 34.04323086215862,
-        long: -118.26714681164798
+        lng: -118.26714681164798
       },
       {
         groupId: 1,
@@ -34,7 +34,7 @@ module.exports = {
         city: 'New York',
         state: 'NY',
         lat: 40.741198662256004,
-        long: -73.98963423038316
+        lng: -73.98963423038316
       },
       {
         groupId: 2,
@@ -42,7 +42,7 @@ module.exports = {
         city: 'San Francisco',
         state: 'CA',
         lat: 37.78975651746192,
-        long: -122.40190579372981
+        lng: -122.40190579372981
       },
       {
         groupId: 3,
@@ -50,7 +50,15 @@ module.exports = {
         city: 'New York',
         state: 'NY',
         lat: 37.7645358,
-        long: -122.4730327
+        lng: -122.4730327
+      },
+      {
+        groupId: 4,
+        address: '1600 Pennsylvania Avenue',
+        city: 'Washington',
+        state: 'DC',
+        lat: 38.897957,
+        lng: -38.897957
       }
    ], {});
   },
@@ -64,7 +72,7 @@ module.exports = {
      */
     const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options, {
-      address: { [Op.in]: ['111 S. Figueroa St.', '175 5th Ave.', '44 Montgomery St.', '123 Disney Lane'] }
+      address: { [Op.in]: ['111 S. Figueroa St.', '175 5th Ave.', '44 Montgomery St.', '123 Disney Lane', '1600 Pennsylvania Avenue'] }
     }, {});
   }
 };

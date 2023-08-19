@@ -19,7 +19,8 @@ module.exports = {
       },
       groupId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'Groups' , key: 'id'}
       },
       address: {
         type: Sequelize.STRING(255),
@@ -36,7 +37,7 @@ module.exports = {
       lat: {
         type: Sequelize.DECIMAL,
       },
-      long: {
+      lng: {
         type: Sequelize.DECIMAL,
       },
       createdAt: {

@@ -31,6 +31,22 @@ const validateSignup = [
 
 const router = express.Router();
 
+
+// Get the Current User
+router.get('/me', requireAuth, async (req, res) => {
+
+  const { user } = req;
+  // console.log(user);
+  if (user) {
+    const safeUser = user.toSafe();
+    return res.json({
+      user: safeUser
+    });
+  } else return res.json({ user: null });
+
+});
+
+
 // Sign up
 router.post('/', validateSignup, async (req, res) => {
   const { email, password, username } = req.body;

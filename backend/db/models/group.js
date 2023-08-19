@@ -12,25 +12,29 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Group.belongsTo(models.User, {
-        foreignKey: 'organizerId'
+        foreignKey: 'organizerId',
+        key: 'id',
+        as: 'Organizers'
       });
       Group.belongsToMany(models.User, {
         through: models.GroupMember,
-        foreignkey: 'groupId',
-        otherKey: 'userId'
+        foreignKey: 'groupId',
+        otherKey: 'userId',
+        as: 'Members'
       });
       Group.hasMany(models.Event, {
-        foreignkey: 'groupId',
+        foreignKey: 'groupId',
       });
       Group.hasMany(models.Venue, {
-        foreignkey: 'groupId',
+        foreignKey: { name: 'groupId' },
       });
       Group.hasMany(models.Image, {
         foreignKey: 'imageableId',
         constraints: false,
         scope: {
           imageableType: 'Group'
-        }
+        },
+        as: 'GroupImages'
       });
     }
   }
@@ -67,7 +71,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     city: {
       type: DataTypes.STRING(50),
-      allowNull: false
+      allowNull: false,
+      validate: {
+        len: [1,50]
+      }
     },
     state: {
       type: DataTypes.STRING(2),
