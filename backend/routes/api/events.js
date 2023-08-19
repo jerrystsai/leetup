@@ -110,8 +110,6 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
         ]}
       }
     );
-    console.log('--- userGroupMembership', userGroupMembership);
-
     const userEventAttendance = await EventAttendee.findAll(
       {where: {eventId, userId}}
     );
@@ -135,7 +133,6 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
           });
         }
       } else {
-        console.log('--- HERE HERE');
         const updateSelectedEventAttendee = await EventAttendee.create(
           {
             eventId,
@@ -144,14 +141,100 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
           }
         );
 
-        const selectedEventAttendee = await EventAttendee.findAll({
+        const selectedEventAttendeeArray = await EventAttendee.findAll({
           attributes: ['userId', 'status'],
           where: {
             [Op.and]: [{eventId}, {userId}]
           }
         });
 
+        const selectedEventAttendee = selectedEventAttendeeArray[0];
+
         res.status(200).json(selectedEventAttendee);
+      }
+    }
+  }
+});
+
+
+// Change the status of an attendance for an event specified by id
+router.put('/:eventId/attendees', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const userId = +req.user.id;
+  const { userId: attendeeId, status } = req.body
+
+  const selectedEvent = await Event.findByPk(eventId, {
+    attributes: [],
+    include: [
+        {
+          model: User,
+          as: 'Attendees',
+          through: {
+            attributes: ['status'],
+            as: 'Attendance'
+          }
+        },
+      ],
+  });
+
+  if (!selectedEvent) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else {
+    const selectedEventGroupId = await Event.findByPk(eventId);
+    const groupIdOfSelectedEvent = selectedEventGroupId.groupId;
+
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
+    const groupCohosts = await GroupMember.findAll({
+      attributes: ['userId'],
+      where: {
+        groupId: groupIdOfSelectedEvent,
+        status: 'co-host'
+      },
+      raw: true
+    });
+    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+    if (!selectedGroup.organizerId === userId && !groupCohostsArray.includes(userId)) {
+      res.status(403).json({
+        message: "Forbidden"
+      });
+    } else if (status === 'pending') {
+      res.status(400).json({
+        message: "Cannot change an attendance status to pending"
+      });
+    } else {
+      const selectedEventAttendeeArray = await EventAttendee.findAll({
+        attributes: ['userId', 'status'],
+        where: {
+          [Op.and]: [{eventId}, {userId: attendeeId}]
+        }
+      });
+      if (selectedEventAttendeeArray.length === 0) {
+        res.status(400).json({
+          message: "Attendance between the user and the event does not exist"
+        });
+      } else {
+        const updatedSelectedEventAttendee = await EventAttendee.update(
+          { status },
+          {
+            where: {
+              [Op.and]: [{eventId}, {userId: attendeeId}]
+            }
+          }
+        );
+
+        const selectedEventAttendeeArrayConfirmed = await EventAttendee.findAll({
+          attributes: ['userId', 'status'],
+          where: {
+            [Op.and]: [{eventId}, {userId: attendeeId}]
+          }
+        });
+
+        const selectedEventAttendee = selectedEventAttendeeArrayConfirmed[0];
+
+        res.json(selectedEventAttendee);
       }
     }
   }
