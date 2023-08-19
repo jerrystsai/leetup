@@ -1517,7 +1517,7 @@ Change the status of a membership for a group specified by id.
 - Request
 
   - Method: `PUT`
-  - URL: `/groups/:groupId/members/:memberId`
+  - URL: `/groups/:groupId/members`
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -1855,7 +1855,7 @@ Change the status of an attendance for an event specified by id.
 - Request
 
   - Method: PUT
-  - URL: `/events/:eventId/attendees/:userId`
+  - URL: `/events/:eventId/attendees`
   - Headers:
     - Content-Type: application/json
   - Body:
