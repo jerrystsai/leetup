@@ -374,7 +374,7 @@ router.post('/:groupId/venues', requireAuth, validateVenue, async (req, res) => 
     },
     raw: true
   });
-  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+  const groupCohostsArray = groupCohosts.map(cohostObj => cohostObj.userId);
 
   if (!selectedGroup) {
     res.status(404).json({
