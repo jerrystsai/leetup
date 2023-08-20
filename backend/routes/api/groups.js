@@ -5,6 +5,7 @@ const { Op } = require("sequelize");
 
 // Internal
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
+const { graftValues } = require('../../utils/functions');
 const {
   handleValidationErrors,
   validateGroup,
@@ -602,14 +603,23 @@ router.get('/', async (req, res) => {
 
   const allGroupsArray = allGroups.map(group => {
     const groupData = group.dataValues;
-    // groupData['numMembers'] = groupData['Members'].length;
     groupData['previewImage'] = groupData['GroupImages'].length > 0 ? groupData.GroupImages[0]['url'] : null;
-    // delete groupData['Members'];
     delete groupData['GroupImages']
     return groupData;
   });
 
-  return res.json({Groups: allGroupsArray});
+
+  const allGroupsMembersCount = await GroupMember.findAll({
+    attributes: ['groupId', [sequelize.fn('COUNT', 'groupId'), 'numMembers']],
+    where: {status: ['co-host', 'member']},
+    group: ['groupId']
+  });
+  console.log(allGroupsMembersCount)
+
+  const allGroupsArrayGrafted = graftValues(allGroupsArray, 'id', allGroupsMembersCount, 'groupId', 'numMembers', 0);
+
+  return res.json(allGroupsArray);
+  // return res.json({Groups: allGroupsArray});
 });
 
 // Create a Group
