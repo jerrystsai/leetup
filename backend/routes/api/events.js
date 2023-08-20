@@ -404,6 +404,7 @@ router.get('/', async (req, res) => {
       {
         model: User,
         attributes: [],
+        as: 'Attendees'
       },
       {
         model: Image,
@@ -425,7 +426,7 @@ router.get('/', async (req, res) => {
     ],
     attributes: {
       include: [
-        [sequelize.fn('COUNT', sequelize.col('`Users->EventAttendee`.`id`')), 'numAttending'],
+        [sequelize.fn('COUNT', sequelize.col('`Attendees->EventAttendee`.`id`')), 'numAttending'],
         [sequelize.col('EventImages.url'), 'previewImage']
       ],
       exclude: ['description', 'capacity', 'price']
