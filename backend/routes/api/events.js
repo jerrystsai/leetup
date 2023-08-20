@@ -402,13 +402,8 @@ router.get('/', async (req, res) => {
   const allEvents = await Event.findAll({
   include: [
       {
-        model: User,
-        attributes: [],
-        as: 'Attendees'
-      },
-      {
         model: Image,
-        attributes: [],
+        attributes: ['url'],
         where: { preview: true },
         required: false,
         as: 'EventImages'
@@ -416,25 +411,33 @@ router.get('/', async (req, res) => {
       {
         model: Group,
         attributes: ['id', 'name', 'city', 'state'],
-        // as: 'Members'
       },
       {
         model: Venue,
         attributes: ['id', 'city', 'state'],
-        // as: 'Members'
       }
     ],
     attributes: {
-      include: [
-        [sequelize.fn('COUNT', sequelize.col('`Attendees->EventAttendee`.`id`')), 'numAttending'],
-        [sequelize.col('EventImages.url'), 'previewImage']
-      ],
       exclude: ['description', 'capacity', 'price']
     },
-    group: ['Event.id']
   });
 
-  return res.json({Events: allEvents});
+  const allEventsArray = allEvents.map(event => {
+    const eventData = event.dataValues;
+    eventData['previewImage'] = eventData['EventImages'].length > 0 ? eventData.EventImages[0]['url'] : null;
+    delete eventData['EventImages']
+    return eventData;
+  });
+
+  const alleventsAttendeesCount = await EventAttendee.findAll({
+    attributes: ['eventId', [sequelize.fn('COUNT', 'eventId'), 'numAttending']],
+    where: {status: ['attending']},
+    group: ['eventId']
+  });
+
+  const alleventsArrayGrafted = graftValues(allEventsArray, 'id', alleventsAttendeesCount, 'eventId', 'numAttending', 0);
+
+  return res.json({Events: alleventsArrayGrafted});
 });
 
 
