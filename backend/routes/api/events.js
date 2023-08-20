@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 
 // Internal
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { graftValues } = require('../../utils/functions');
+const { graftValues, findAllResultToArray } = require('../../utils/functions');
 const {
   handleValidationErrors,
   validateGroup,

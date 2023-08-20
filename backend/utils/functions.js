@@ -14,6 +14,9 @@ const graftValues = (array1, array1Key, array2, array2Key, array2Value, defaultV
   return array1Grafted;
 };
 
+const findAllResultToArray = (findAllResult) => findAllResult.map( ele => ele.dataValues );
+
 module.exports = {
-  graftValues
+  graftValues,
+  findAllResultToArray
 };
