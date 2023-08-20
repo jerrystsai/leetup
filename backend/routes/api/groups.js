@@ -573,21 +573,10 @@ router.get('/:groupId', async (req, res) => {
         as: 'Organizers'
       },
       {
-        model: User,
-        attributes: [],
-        as: 'Members'
-      },
-      {
         model: Venue,
         // attributes: []
       }
     ],
-    attributes: {
-      include: [
-        [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
-      ]
-    },
-    group: ['Group.id']
   });
 
   return specificGroup ? res.json(specificGroup): res.status(404).json({message: "Group couldn't be found"});
