@@ -579,7 +579,16 @@ router.get('/:groupId', async (req, res) => {
     ],
   });
 
-  return specificGroup ? res.json(specificGroup): res.status(404).json({message: "Group couldn't be found"});
+  const specificGroupMemberCount = await GroupMember.findAll({
+    where: {status: ['co-host', 'member'], groupId},
+  });
+
+  if (specificGroup) {
+    specificGroup.dataValues['numMembers'] = specificGroupMemberCount.length;
+    res.json(specificGroup);
+  } else {
+    res.status(404).json({message: "Group couldn't be found"});
+  }
 });
 
 // Edit a Group
