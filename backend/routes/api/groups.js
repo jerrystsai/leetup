@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 
 // Internal
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { graftValues } = require('../../utils/functions');
+const { graftValues, findAllResultToArray } = require('../../utils/functions');
 const {
   handleValidationErrors,
   validateGroup,
@@ -464,37 +464,94 @@ router.post('/:groupId/images', requireAuth, validateImage, async (req, res) => 
 
 // Get all Groups joined or organized by the Current User
 router.get('/me', requireAuth, async (req, res) => {
-  const allGroupsForUser = await Group.findAll({
+  const userId = req.user.id;
+  // where: {
+  //     [Op.or]: [
+  //       { organizerId: Number(req.user.id) },
+  //       { '$`Members->GroupMember`.`userId`$': Number(req.user.id) }
+  //     ]
+
+  // Current user, group memberships
+  const groupsJoinedByCurrentUser = await GroupMember.findAll({
+    attributes: ['groupId', 'status'],
+    where: {userId, status: ['co-host', 'member']}
+  })
+  const groupsJoinedByCurrentUserArray = findAllResultToArray(groupsJoinedByCurrentUser);
+  const groupNumbersJoinedByCurrentUser = groupsJoinedByCurrentUserArray.map( ele => ele.groupId);
+
+  // Current user, group organizer
+  const groupsOrganizedByCurrentUser = await Group.findAll({
+    attributes: ['id'],
+    where: {organizerId: userId}
+  })
+  const groupsOrganizedByCurrentUserArray = findAllResultToArray(groupsOrganizedByCurrentUser);
+  const groupNumbersOrganizedByCurrentUser = groupsOrganizedByCurrentUserArray.map( ele => ele.id);
+
+  const groupNumbersAssociatedToCurrentUser = [...new Set([...groupNumbersJoinedByCurrentUser, ...groupNumbersOrganizedByCurrentUser])]
+
+  const allGroupsAssocToCurrentUser = await Group.findAll({
+    where: {id: groupNumbersAssociatedToCurrentUser},
     include: [
       {
-        model: User,
-        attributes: [],
-        as: 'Members'
-      },
-      {
         model: Image,
-        attributes: [],
+        attributes: ['url'],
         where: { preview: true },
         required: false,
         as: 'GroupImages'
       }
     ],
-    attributes: {
-      include: [
-        [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
-        [sequelize.col('GroupImages.url'), 'previewUrl']
-      ]
-    },
-    group: ['Group.id'],
-    where: {
-      [Op.or]: [
-        { organizerId: Number(req.user.id) },
-        { '$`Members->GroupMember`.`userId`$': Number(req.user.id) }
-      ]
-    }
   });
 
-  return res.json({Groups: allGroupsForUser});
+  const allGroupsArray = allGroupsAssocToCurrentUser.map(group => {
+    const groupData = group.dataValues;
+    groupData['previewImage'] = groupData['GroupImages'].length > 0 ? groupData.GroupImages[0]['url'] : null;
+    delete groupData['GroupImages']
+    return groupData;
+  });
+
+  const allGroupsMembersCount = await GroupMember.findAll({
+    attributes: ['groupId', [sequelize.fn('COUNT', 'groupId'), 'numMembers']],
+    where: {status: ['co-host', 'member'], groupId: groupNumbersAssociatedToCurrentUser},
+    group: ['groupId']
+  });
+
+  const allGroupsArrayGrafted = graftValues(allGroupsArray, 'id', allGroupsMembersCount, 'groupId', 'numMembers', 0);
+
+  return res.json({Groups: allGroupsArrayGrafted});
+
+  // sqlite-working code
+  //
+  // const allGroupsForUser = await Group.findAll({
+  //   include: [
+  //     {
+  //       model: User,
+  //       attributes: [],
+  //       as: 'Members'
+  //     },
+  //     {
+  //       model: Image,
+  //       attributes: [],
+  //       where: { preview: true },
+  //       required: false,
+  //       as: 'GroupImages'
+  //     }
+  //   ],
+  //   attributes: {
+  //     include: [
+  //       [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
+  //       [sequelize.col('GroupImages.url'), 'previewUrl']
+  //     ]
+  //   },
+  //   group: ['Group.id'],
+  //   where: {
+  //     [Op.or]: [
+  //       { organizerId: Number(req.user.id) },
+  //       { '$`Members->GroupMember`.`userId`$': Number(req.user.id) }
+  //     ]
+  //   }
+  // });
+
+  // return res.json({Groups: allGroupsForUser});
 });
 
 // Get details of a Group from an id
@@ -585,7 +642,6 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
   }
 });
 
-// GroupMember group: ['groupId']
 
 // Get all Groups
 router.get('/', async (req, res) => {
@@ -608,18 +664,42 @@ router.get('/', async (req, res) => {
     return groupData;
   });
 
-
   const allGroupsMembersCount = await GroupMember.findAll({
     attributes: ['groupId', [sequelize.fn('COUNT', 'groupId'), 'numMembers']],
     where: {status: ['co-host', 'member']},
     group: ['groupId']
   });
-  console.log(allGroupsMembersCount)
 
   const allGroupsArrayGrafted = graftValues(allGroupsArray, 'id', allGroupsMembersCount, 'groupId', 'numMembers', 0);
 
-  return res.json(allGroupsArray);
-  // return res.json({Groups: allGroupsArray});
+  return res.json({Groups: allGroupsArrayGrafted});
+
+// sqlite-working code
+//
+// router.get('/', async (req, res) => {
+//   const allGroups = await Group.findAll({
+//     include: [
+//       {
+//         model: User,
+//         attributes: [],
+//         as: 'Members'
+//       },
+//       {
+//         model: Image,
+//         attributes: [],
+//         where: { preview: true },
+//         required: false,
+//         as: 'GroupImages'
+//       }
+//     ],
+//     attributes: {
+//       include: [
+//         [sequelize.fn('COUNT', sequelize.col('`Members->GroupMember`.`id`')), 'numMembers'],
+//         [sequelize.col('GroupImages.url'), 'previewUrl']
+//       ]
+//     },
+//     group: ['Group.id']
+//   });
 });
 
 // Create a Group
