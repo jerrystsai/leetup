@@ -429,15 +429,15 @@ router.get('/', async (req, res) => {
     return eventData;
   });
 
-  const alleventsAttendeesCount = await EventAttendee.findAll({
+  const allEventsAttendeesCount = await EventAttendee.findAll({
     attributes: ['eventId', [sequelize.fn('COUNT', 'eventId'), 'numAttending']],
     where: {status: ['attending']},
     group: ['eventId']
   });
 
-  const alleventsArrayGrafted = graftValues(allEventsArray, 'id', alleventsAttendeesCount, 'eventId', 'numAttending', 0);
+  const allEventsArrayGrafted = graftValues(allEventsArray, 'id', allEventsAttendeesCount, 'eventId', 'numAttending', 0);
 
-  return res.json({Events: alleventsArrayGrafted});
+  return res.json({Events: allEventsArrayGrafted});
 });
 
 
