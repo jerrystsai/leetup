@@ -305,6 +305,7 @@ router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => 
   }
 });
 
+
 // Get details of an Event specified by its id
 router.get('/:eventId', async (req, res) => {
   const { eventId } = req.params;
@@ -312,41 +313,71 @@ router.get('/:eventId', async (req, res) => {
   const selectedEvent = await Event.findByPk(eventId, {
   include: [
       {
-        model: User,
-        attributes: [],
-      },
-      {
         model: Group,
-        attributes: ['id', 'name', 'city', 'state'],
-        // as: 'Members'
+        attributes: ['id', 'name', 'private', 'city', 'state'],
       },
       {
         model: Venue,
         attributes: ['id', 'city', 'state'],
-        // as: 'Members'
       }
-    ],
-    attributes: {
-      include: [
-        [sequelize.fn('COUNT', sequelize.col('`Users->EventAttendee`.`id`')), 'numAttending']
-      ]
-    },
-    group: ['Event.id']
+    ]
   });
 
-  if (!selectedEvent) {
-    res.status(404).json({
-      message: "Event couldn't be found"
-    });
+  const selectedEventAttendeeCount = await EventAttendee.findAll({
+    where: {status: ['attending'], eventId},
+  });
+
+  if (selectedEvent) {
+    selectedEvent.dataValues['numAttending'] = selectedEventAttendeeCount.length;
+    res.json(selectedEvent);
   } else {
-    const eventImages = await Image.findAll(
-      {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
-    )
-    const selectedEventJSON = selectedEvent.toJSON();
-    selectedEventJSON['EventImages'] = eventImages;
-    return res.json(selectedEventJSON);
+    res.status(404).json({message: "Event couldn't be found"});
   }
 });
+
+// sqlite-working code
+//
+// router.get('/:eventId', async (req, res) => {
+//   const { eventId } = req.params;
+
+//   const selectedEvent = await Event.findByPk(eventId, {
+//   include: [
+//       {
+//         model: User,
+//         attributes: [],
+//         as: 'Attendees'
+//       },
+//       {
+//         model: Group,
+//         attributes: ['id', 'name', 'private', 'city', 'state'],
+//       },
+//       {
+//         model: Venue,
+//         attributes: ['id', 'city', 'state'],
+//       }
+//     ],
+//     attributes: {
+//       include: [
+//         [sequelize.fn('COUNT', sequelize.col('`Attendees->EventAttendee`.`id`')), 'numAttending']
+//       ]
+//     },
+//     group: ['Event.id']
+//   });
+
+//   if (!selectedEvent) {
+//     res.status(404).json({
+//       message: "Event couldn't be found"
+//     });
+//   } else {
+//     const eventImages = await Image.findAll(
+//       {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
+//     )
+//     const selectedEventJSON = selectedEvent.toJSON();
+//     selectedEventJSON['EventImages'] = eventImages;
+//     return res.json(selectedEventJSON);
+//   }
+// });
+
 
 // Edit a Event
 router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
@@ -402,13 +433,8 @@ router.get('/', async (req, res) => {
   const allEvents = await Event.findAll({
   include: [
       {
-        model: User,
-        attributes: [],
-        as: 'Attendees'
-      },
-      {
         model: Image,
-        attributes: [],
+        attributes: ['url'],
         where: { preview: true },
         required: false,
         as: 'EventImages'
@@ -416,25 +442,33 @@ router.get('/', async (req, res) => {
       {
         model: Group,
         attributes: ['id', 'name', 'city', 'state'],
-        // as: 'Members'
       },
       {
         model: Venue,
         attributes: ['id', 'city', 'state'],
-        // as: 'Members'
       }
     ],
     attributes: {
-      include: [
-        [sequelize.fn('COUNT', sequelize.col('`Attendees->EventAttendee`.`id`')), 'numAttending'],
-        [sequelize.col('EventImages.url'), 'previewImage']
-      ],
       exclude: ['description', 'capacity', 'price']
     },
-    group: ['Event.id']
   });
 
-  return res.json({Events: allEvents});
+  const allEventsArray = allEvents.map(event => {
+    const eventData = event.dataValues;
+    eventData['previewImage'] = eventData['EventImages'].length > 0 ? eventData.EventImages[0]['url'] : null;
+    delete eventData['EventImages']
+    return eventData;
+  });
+
+  const allEventsAttendeesCount = await EventAttendee.findAll({
+    attributes: ['eventId', [sequelize.fn('COUNT', 'eventId'), 'numAttending']],
+    where: {status: ['attending']},
+    group: ['eventId']
+  });
+
+  const allEventsArrayGrafted = graftValues(allEventsArray, 'id', allEventsAttendeesCount, 'eventId', 'numAttending', 0);
+
+  return res.json({Events: allEventsArrayGrafted});
 });
 
 

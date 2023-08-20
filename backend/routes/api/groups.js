@@ -259,8 +259,10 @@ router.get('/:groupId/venues', requireAuth, async (req, res) => {
 });
 
 // Get all Events of a Group specified by its id
-router.get('/:groupId/events', validateGroupId, async (req, res) => {
-  const { groupId } = req.params;
+
+router.get('/:groupId/events', async (req, res) => {
+  // const { groupId } = req.params;
+  const groupId = Number(req.params.groupId);
 
   const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
 
@@ -269,15 +271,11 @@ router.get('/:groupId/events', validateGroupId, async (req, res) => {
       message: "Group couldn't be found"
     })
   } else {
-    const allEvents = await Event.findAll({
-    include: [
-        {
-          model: User,
-          attributes: [],
-        },
+    const allEventsForGroup = await Event.findAll({
+      include: [
         {
           model: Image,
-          attributes: [],
+          attributes: ['url'],
           where: { preview: true },
           required: false,
           as: 'EventImages'
@@ -285,27 +283,85 @@ router.get('/:groupId/events', validateGroupId, async (req, res) => {
         {
           model: Group,
           attributes: ['id', 'name', 'city', 'state'],
-          // as: 'Members'
         },
         {
           model: Venue,
           attributes: ['id', 'city', 'state'],
-          // as: 'Members'
         }
       ],
       attributes: {
-        include: [
-          [sequelize.fn('COUNT', sequelize.col('`Users->EventAttendee`.`id`')), 'numAttending'],
-          [sequelize.col('EventImages.url'), 'previewImage']
-        ],
         exclude: ['description', 'capacity', 'price']
       },
-      group: ['Event.id'],
       where: { groupId }
     });
 
-    return res.json({Events: allEvents});
+    const allEventsForGroupArray = allEventsForGroup.map(event => {
+      const eventData = event.dataValues;
+      eventData['previewImage'] = eventData['EventImages'].length > 0 ? eventData.EventImages[0]['url'] : null;
+      delete eventData['EventImages']
+      return eventData;
+    });
+
+    const allEventsForGroupAttendeesCount = await EventAttendee.findAll({
+      attributes: ['eventId', [sequelize.fn('COUNT', 'eventId'), 'numAttending']],
+      where: {status: ['attending']},
+      group: ['eventId']
+    });
+
+    const allEventsForGroupArrayGrafted = graftValues(allEventsForGroupArray, 'id', allEventsForGroupAttendeesCount, 'eventId', 'numAttending', 0);
+
+    return res.json({Events: allEventsForGroupArrayGrafted});
   }
+
+// sqlite-working version
+//
+// router.get('/:groupId/events', validateGroupId, async (req, res) => {
+//   const { groupId } = req.params;
+
+//   const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+
+//   if (!selectedGroup) {
+//     res.status(404).json({
+//       message: "Group couldn't be found"
+//     })
+//   } else {
+//     const allEvents = await Event.findAll({
+//     include: [
+//         {
+//           model: User,
+//           attributes: [],
+//         },
+//         {
+//           model: Image,
+//           attributes: [],
+//           where: { preview: true },
+//           required: false,
+//           as: 'EventImages'
+//         },
+//         {
+//           model: Group,
+//           attributes: ['id', 'name', 'city', 'state'],
+//           // as: 'Members'
+//         },
+//         {
+//           model: Venue,
+//           attributes: ['id', 'city', 'state'],
+//           // as: 'Members'
+//         }
+//       ],
+//       attributes: {
+//         include: [
+//           [sequelize.fn('COUNT', sequelize.col('`Users->EventAttendee`.`id`')), 'numAttending'],
+//           [sequelize.col('EventImages.url'), 'previewImage']
+//         ],
+//         exclude: ['description', 'capacity', 'price']
+//       },
+//       group: ['Event.id'],
+//       where: { groupId }
+//     });
+//   }
+//   return res.json({Events: allEvents});
+// }
 });
 
 // Request a Membership for a Group based on the Group's id
