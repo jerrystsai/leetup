@@ -7,8 +7,11 @@ const graftValues = (array1, array1Key, array2, array2Key, array2Value, defaultV
     return dict;
   } , {});
   const array1Grafted = array1.map( ele => {
-    console.log(array2Value, ele, ele[array2Value], ele[array2Key]);
-    ele[array2Value] = array2Indexed[ele[array1Key]] ? array2Indexed[ele[array1Key]] : defaultValue;
+    if (typeof defaultValue === 'number') {
+      ele[array2Value] = array2Indexed[ele[array1Key]] ? Number(array2Indexed[ele[array1Key]]) : defaultValue;
+    } else {
+      ele[array2Value] = array2Indexed[ele[array1Key]] ? array2Indexed[ele[array1Key]] : defaultValue;
+    }
     return ele;
   })
   return array1Grafted;
