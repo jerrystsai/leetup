@@ -12,7 +12,9 @@ const {
   validateVenue,
   validateEvent,
   validateImage,
-  validateGroupId
+  validateGroupId,
+  validateMemberStatus,
+  validateAttendeeStatus
 } = require('../../utils/validation');
 
 const { User, Group, Image, Venue, GroupMember, Event, EventAttendee } = require('../../db/models');
@@ -379,7 +381,7 @@ router.get('/:eventId', async (req, res) => {
 // });
 
 
-// Edit a Event
+// Edit an Event specified by its id
 router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
   const { eventId } = req.params;
   const userId = +req.user.id;

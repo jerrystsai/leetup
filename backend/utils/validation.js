@@ -138,6 +138,20 @@ const validateGroupId = [
   handleValidationErrors
 ];
 
+const validateMemberStatus = [
+  check('status')
+    .isIn(['co-host', 'member', 'pending'])
+    .withMessage("Status must be 'co-host', 'member', or 'pending'"),
+  handleValidationErrors
+];
+
+const validateAttendeeStatus = [
+  check('status')
+    .isIn(['attending', 'waitlist', 'pending'])
+    .withMessage("Status must be 'attending', 'waitlist', or 'pending'"),
+  handleValidationErrors
+];
+
 
 module.exports = {
   handleValidationErrors,
@@ -145,5 +159,7 @@ module.exports = {
   validateVenue,
   validateEvent,
   validateImage,
-  validateGroupId
+  validateGroupId,
+  validateMemberStatus,
+  validateAttendeeStatus
 };

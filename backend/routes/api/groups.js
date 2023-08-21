@@ -12,7 +12,9 @@ const {
   validateVenue,
   validateEvent,
   validateImage,
-  validateGroupId
+  validateGroupId,
+  validateMemberStatus,
+  validateAttendeeStatus
 } = require('../../utils/validation');
 
 const { User, Group, Image, Venue, GroupMember, Event, EventAttendee } = require('../../db/models');
@@ -24,7 +26,7 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
-// Get details of a Group from an id
+// Get all Members of a Group specified by its id
 router.get('/:groupId/members', validateGroupId, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
@@ -83,7 +85,7 @@ router.get('/:groupId/members', validateGroupId, async (req, res) => {
 });
 
 // Change the status of a membership for a group specified by id
-router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) => {
+router.put('/:groupId/members', requireAuth, validateGroupId, validateMemberStatus, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
   const { memberId, status } = req.body;
@@ -94,18 +96,10 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
     'SELECT `GroupMembers`.`status` FROM `Users` INNER JOIN `GroupMembers` ON `Users`.`id` = `GroupMembers`.`userId` WHERE `Users`.`id` = ' + `${userId}` + ' AND `GroupMembers`.`groupId` = ' + `${groupId}`;
   const selectedUserSelectedGroupMembership = await sequelize.query(theQuery1);
 
-  const selectedMember = await User.findByPk(memberId, {
-    include: [
-      {
-        model: Group,
-        as: 'Groups',
-        through: {
-          attributes: ['status'],
-          as: 'Membership'
-        }
-      }
-    ]
-  });
+  const selectedMember = await GroupMember.findOne({
+    attributes: ['groupId', 'userId', 'status'],
+    where: {groupId, userId: memberId}
+  }).then(res => res ? res.toJSON() : null);
 
   const theQuery2 =
     'SELECT `GroupMembers`.`status` FROM `Users` INNER JOIN `GroupMembers` ON `Users`.`id` = `GroupMembers`.`userId` WHERE `Users`.`id` = ' + `${memberId}` + ' AND `GroupMembers`.`groupId` = ' + `${groupId}`;
@@ -150,7 +144,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
     });
   } else {
     const selectedGroupOrganizerId = selectedGroup['organizerId'];
-    const groupStatusOfSelectedMember = selectedMember['Groups'][0]['Membership']['status'];
+    const groupStatusOfSelectedMember = selectedMember.status;
 
     if (
         (userId === selectedGroupOrganizerId || groupCohostsArray.includes(userId)) &&
@@ -166,7 +160,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
         );
 
         const selectedGroupMember = await GroupMember.findOne({
-          attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
+          attributes: ['id', 'groupId', 'userId', 'status'],
           where: {
             [Op.and]: [{groupId}, {userId: memberId}]
           }
@@ -191,7 +185,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
         );
 
         const selectedGroupMember = await GroupMember.findOne({
-          attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
+          attributes: ['id', 'groupId', 'userId', 'status'],
           where: {
             [Op.and]: [{groupId}, {userId: memberId}]
           }
@@ -217,6 +211,143 @@ router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) =
     }
   }
 });
+
+// sqlite-working code
+//
+// router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) => {
+//   const { groupId } = req.params;
+//   const userId = +req.user.id;
+//   const { memberId, status } = req.body;
+
+//   const selectedUser = await User.findByPk(userId, {});
+
+//   const theQuery1 =
+//     'SELECT `GroupMembers`.`status` FROM `Users` INNER JOIN `GroupMembers` ON `Users`.`id` = `GroupMembers`.`userId` WHERE `Users`.`id` = ' + `${userId}` + ' AND `GroupMembers`.`groupId` = ' + `${groupId}`;
+//   const selectedUserSelectedGroupMembership = await sequelize.query(theQuery1);
+
+//   const selectedMember = await User.findByPk(memberId, {
+//     include: [
+//       {
+//         model: Group,
+//         as: 'Groups',
+//         through: {
+//           attributes: ['status'],
+//           as: 'Membership'
+//         }
+//       }
+//     ]
+//   });
+
+//   const theQuery2 =
+//     'SELECT `GroupMembers`.`status` FROM `Users` INNER JOIN `GroupMembers` ON `Users`.`id` = `GroupMembers`.`userId` WHERE `Users`.`id` = ' + `${memberId}` + ' AND `GroupMembers`.`groupId` = ' + `${groupId}`;
+//   const selectedMemberSelectedGroupMembership = await sequelize.query(theQuery2);
+
+//   const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+//   const groupCohosts = await GroupMember.findAll({
+//     attributes: ['userId'],
+//     where: {
+//       groupId,
+//       status: 'co-host'
+//     },
+//     raw: true
+//   });
+//   const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+//   if (selectedUserSelectedGroupMembership[0].length === 0) {
+//     res.status(403).json({
+//       message: "Forbidden"
+//     });
+//   } else if (!selectedGroup) {
+//     res.status(404).json({
+//       message: "Group couldn't be found"
+//     });
+//   } else if (!selectedMember) {
+//     res.status(404).json({
+//       message: "Validation Error",
+//       errors: {
+//         "memberId": "User couldn't be found"
+//       }
+//     });
+//   } else if (status === 'pending') {
+//     res.status(400).json({
+//       message: "Validations Error",
+//       errors: {
+//         status: "Cannot change a membership status to pending"
+//       }
+//     })
+//   } else if (selectedMemberSelectedGroupMembership[0].length === 0) {
+//     res.status(404).json({
+//       message: "Membership between the user and the group does not exist"
+//     });
+//   } else {
+//     const selectedGroupOrganizerId = selectedGroup['organizerId'];
+//     const groupStatusOfSelectedMember = selectedMember['Groups'][0]['Membership']['status'];
+
+//     if (
+//         (userId === selectedGroupOrganizerId || groupCohostsArray.includes(userId)) &&
+//         (groupStatusOfSelectedMember === 'pending' && (status === 'member'))
+//       ) {
+//         const updateSelectedGroupMember = await GroupMember.update(
+//           { status },
+//           {
+//             where: {
+//               [Op.and]: [{groupId}, {userId: memberId}]
+//             }
+//           }
+//         );
+
+//         const selectedGroupMember = await GroupMember.findOne({
+//           attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
+//           where: {
+//             [Op.and]: [{groupId}, {userId: memberId}]
+//           }
+//         });
+
+//         res.status(200).json(selectedGroupMember);
+
+//     } else if (
+//         (userId === selectedGroupOrganizerId) &&
+//         (
+//           ((groupStatusOfSelectedMember === 'pending' || groupStatusOfSelectedMember === 'member') && status === 'co-host') ||
+//           ((groupStatusOfSelectedMember === 'co-host') && status === 'member')
+//         )
+//       ) {
+//         const updateSelectedGroupMember = await GroupMember.update(
+//           { status },
+//           {
+//             where: {
+//               [Op.and]: [{groupId}, {userId: memberId}]
+//             }
+//           }
+//         );
+
+//         const selectedGroupMember = await GroupMember.findOne({
+//           attributes: ['id', 'groupId', 'userId', 'status', 'createdAt', 'updatedAt'],
+//           where: {
+//             [Op.and]: [{groupId}, {userId: memberId}]
+//           }
+//         });
+
+//         res.status(200).json(selectedGroupMember);
+
+//       } else if (
+//         (userId === selectedGroupOrganizerId || groupCohostsArray.includes(userId)) &&
+//         (groupStatusOfSelectedMember === status)
+//       ) {
+//       const selectedGroupMember = await GroupMember.findOne({
+//         attributes: ['id', 'groupId', 'userId', 'status'],
+//         where: {
+//           [Op.and]: [{groupId}, {userId: memberId}]
+//         }
+//       });
+//       res.status(200).json(selectedGroupMember);
+//     } else {
+//       res.status(403).json({
+//         message: "Forbidden"
+//       });
+//     }
+//   }
+// });
 
 
 // Get All Venues for a Group specified by its id
@@ -376,24 +507,13 @@ router.post('/:groupId/members', requireAuth, async (req, res) => {
       message: "Group couldn't be found"
     });
   } else {
-    const selectedUser = await Group.findByPk(groupId, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Members',
-          attributes: ['id', 'firstName', 'lastName'],
-          through: {
-            attributes: ['status'],
-            as: 'Membership'
-          },
-          where: {id: userId}
-        }
-      ]
-    });
+    const selectedUserGroupInfo = await GroupMember.findOne({
+      attributes: ['groupId', 'userId', 'status'],
+      where: {groupId, userId}
+    }).then(res => res ? res.toJSON() : null);
 
-    if (selectedUser) {
-      const statusOfSelectedUser = selectedUser.Members[0].Membership.status;
+    if (selectedUserGroupInfo) {
+      const statusOfSelectedUser = selectedUserGroupInfo.status;
 
       if (statusOfSelectedUser === 'pending') {
         res.status(400).json({
@@ -413,6 +533,57 @@ router.post('/:groupId/members', requireAuth, async (req, res) => {
     }
   }
 });
+
+// sqlite-working code
+//
+// router.post('/:groupId/members', requireAuth, async (req, res) => {
+//   const { groupId } = req.params;
+//   const userId = +req.user.id;
+
+//   const selectedGroup = await Group.findByPk(groupId);
+
+//   if (!selectedGroup) {
+//     res.status(404).json({
+//       message: "Group couldn't be found"
+//     });
+//   } else {
+//     const selectedUser = await Group.findByPk(groupId, {
+//       attributes: [],
+//       include: [
+//         {
+//           model: User,
+//           as: 'Members',
+//           attributes: ['id', 'firstName', 'lastName'],
+//           through: {
+//             attributes: ['status'],
+//             as: 'Membership'
+//           },
+//           where: {id: userId}
+//         }
+//       ]
+//     });
+
+//     if (selectedUser) {
+//       const statusOfSelectedUser = selectedUser.Members[0].Membership.status;
+
+//       if (statusOfSelectedUser === 'pending') {
+//         res.status(400).json({
+//           message: "Membership has already been requested"
+//         });
+//       } else if (statusOfSelectedUser === 'co-host' || statusOfSelectedUser === 'member') {
+//         res.status(400).json({
+//           message: "User is already a member of the group"
+//         });
+//       }
+//     } else {
+//       const newGroupMember = await GroupMember.create({ groupId, userId, status: 'pending' });
+//       const newGroupMemberConfirmed = await GroupMember.findByPk(newGroupMember.id, {
+//         attributes: [['userId', 'memberId'], 'status']
+//       });
+//       res.status(200).json(newGroupMemberConfirmed);
+//     }
+//   }
+// });
 
 
 // Create a new Venue for a Group specified by its id
@@ -483,6 +654,7 @@ router.post('/:groupId/events', requireAuth, validateEvent, async (req, res) => 
     res.status(200).json(newEventConfirmed);
   }
 });
+
 
 // Add an Image to a Group based on the Group's id
 router.post('/:groupId/images', requireAuth, validateImage, async (req, res) => {
