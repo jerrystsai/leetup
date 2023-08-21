@@ -152,7 +152,6 @@ const validateAttendeeStatus = [
   handleValidationErrors
 ];
 
-
 module.exports = {
   handleValidationErrors,
   validateGroup,

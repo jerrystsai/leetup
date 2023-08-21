@@ -88,6 +88,7 @@ router.get('/:eventId/attendees', async (req, res) => {
   }
 });
 
+
 // Request to Attend an Event based on the Event's id
 router.post('/:eventId/attendees', requireAuth, async (req, res) => {
   const { eventId } = req.params;
@@ -161,7 +162,7 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
 
 
 // Change the status of an attendance for an event specified by id
-router.put('/:eventId/attendees', requireAuth, async (req, res) => {
+router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (req, res) => {
   const { eventId } = req.params;
   const userId = +req.user.id;
   const { userId: attendeeId, status } = req.body
