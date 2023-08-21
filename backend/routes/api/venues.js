@@ -11,7 +11,9 @@ const {
   validateGroup,
   validateVenue,
   validateImage,
-  validateGroupId
+  validateGroupId,
+  validateMemberStatus,
+  validateAttendeeStatus
 } = require('../../utils/validation');
 
 const { User, Group, Image, Venue, GroupMember } = require('../../db/models');
