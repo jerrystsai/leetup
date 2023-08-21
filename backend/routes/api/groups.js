@@ -27,7 +27,7 @@ const router = express.Router();
 //
 
 // Get all Members of a Group specified by its id
-router.get('/:groupId/members', validateGroupId, async (req, res) => {
+router.get('/:groupId/members', async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
 
@@ -85,7 +85,7 @@ router.get('/:groupId/members', validateGroupId, async (req, res) => {
 });
 
 // Change the status of a membership for a group specified by id
-router.put('/:groupId/members', requireAuth, validateGroupId, validateMemberStatus, async (req, res) => {
+router.put('/:groupId/members', requireAuth, validateMemberStatus, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
   const { memberId, status } = req.body;
@@ -214,7 +214,7 @@ router.put('/:groupId/members', requireAuth, validateGroupId, validateMemberStat
 
 // sqlite-working code
 //
-// router.put('/:groupId/members', requireAuth, validateGroupId, async (req, res) => {
+// router.put('/:groupId/members', requireAuth, async (req, res) => {
 //   const { groupId } = req.params;
 //   const userId = +req.user.id;
 //   const { memberId, status } = req.body;
@@ -446,7 +446,7 @@ router.get('/:groupId/events', async (req, res) => {
 
 // sqlite-working version
 //
-// router.get('/:groupId/events', validateGroupId, async (req, res) => {
+// router.get('/:groupId/events', async (req, res) => {
 //   const { groupId } = req.params;
 
 //   const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
