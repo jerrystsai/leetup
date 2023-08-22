@@ -188,13 +188,10 @@ const validatePagination = [
     .withMessage("Type must be a string of either 'Online' or 'In person'"),
   check('startDate')
     .custom(async (value) => {
-      console.log('----', value);
       if (value === undefined) return true;
       else {
         const supposedDate = value.split(' ').join('T') + 'Z';
-        console.log('-----------', supposedDate);
         const isBadDate = isNaN(Date.parse(supposedDate));
-        console.log('isBadDate', isBadDate);
         if (isBadDate) throw new Error("blah blah");
         return isBadDate;
       }
