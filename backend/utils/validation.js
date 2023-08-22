@@ -152,6 +152,54 @@ const validateAttendeeStatus = [
   handleValidationErrors
 ];
 
+// const validatePagination = [
+//   check('page')
+//     .isInt({ min: 1, allow_leading_zeroes: false })
+//     .withMessage("Status must be 'attending', 'waitlist', or 'pending'"),
+//   handleValidationErrors
+
+//   check('venueId')
+//     .isInt({ min: 1, allow_leading_zeroes: false })
+//     .withMessage('Venue does not exist')
+//     .custom(async (value) => {
+//       const selectedVenue = await Venue.findByPk(value);
+//       if (!selectedVenue) throw new Error('Blah blah');
+//       // ^ seems like throwing the error is what works, not the message itself
+//       return !!selectedVenue;
+//     })
+//     .withMessage('Venue does not exist'),
+//   check('name')
+//     .isString()
+//     .withMessage('Name must be a string')
+//     .isLength({ min: 5, max: 255})
+//     .withMessage('Name must be at least 5 characters and less than 256 characters'),
+//   check('description')
+//     .isString()
+//     .withMessage('Description must be a string')
+//     .isLength({ min: 1, max: 255})
+//     .withMessage('Description is required and must be less than 256 characters'),
+//   check('type')
+//     .isIn(['Online', 'In person'])
+//     .withMessage("Type must be 'Online' or 'In person'"),
+//   check('capacity')
+//     .isInt({ min: 2})
+//     .withMessage('Capacity must be an integer greater than 1'),
+//   check('price')
+//     .isFloat({ min: 0 })
+//     .withMessage('Price must be a number greater than or equal to zero')
+//     .isDecimal()
+//     .withMessage('Price must be a number greater than or equal to zero'),
+//   check('startDate')
+//     .isAfter()
+//     .withMessage('Start date must be in the future'),
+//   check('endDate')
+//     .custom((value, { req }) => {
+//       return (value > req.body.startDate);
+//     })
+//     .withMessage('End date must be after start date'),
+
+// ];
+
 module.exports = {
   handleValidationErrors,
   validateGroup,
