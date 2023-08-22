@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.hasMany(models.Group, {
         foreignKey: 'organizerId',
-        as: 'Organizers',
+        as: 'Organizer',
         onDelete: 'cascade'
       });
       User.belongsToMany(models.Group, {
