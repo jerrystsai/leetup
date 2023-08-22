@@ -15,6 +15,8 @@ const {
   validateGroupId,
   validateMemberStatus,
   validateAttendeeStatus,
+  validateMemberId,
+  validateUserId,
   validatePagination
 } = require('../../utils/validation');
 
@@ -137,10 +139,10 @@ router.get('/:eventId/attendees', async (req, res) => {
     })
 
     if (selectedGroup.organizerId === userId || groupCohostsArray.includes(userId)) {
-      res.status(200).json(attendeesInfo);
+      res.status(200).json({"Attendees": attendeesInfo});
     } else {
       const attendeesInfoWithoutPending = attendeesInfo.filter( attObj => attObj.Attendance.status !== 'pending');
-      res.status(200).json(attendeesInfoWithoutPending);
+      res.status(200).json({"Attendees": attendeesInfoWithoutPending});
     }
   }
 });
@@ -202,14 +204,12 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
           }
         );
 
-        const selectedEventAttendeeArray = await EventAttendee.findAll({
+        const selectedEventAttendee = await EventAttendee.findOne({
           attributes: ['userId', 'status'],
           where: {
             [Op.and]: [{eventId}, {userId}]
           }
         });
-
-        const selectedEventAttendee = selectedEventAttendeeArray[0];
 
         res.status(200).json(selectedEventAttendee);
       }
@@ -303,7 +303,7 @@ router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (re
 
 
 // Delete attendance to event specified by id
-router.delete('/:eventId/attendees', requireAuth, async (req, res) => {
+router.delete('/:eventId/attendees', requireAuth, validateUserId, async (req, res) => {
   const { eventId } = req.params;
   const userId = +req.user.id;
   const { userId: attendeeId } = req.body
