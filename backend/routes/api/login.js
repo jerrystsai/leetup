@@ -11,10 +11,10 @@ const { handleValidationErrors } = require('../../utils/validation');
 const { User } = require('../../db/models');
 
 const validateLogin = [
-  check('credential')
+  check('email')
     .exists({ checkFalsy: true })
     .notEmpty()
-    .withMessage('Please provide a valid email or username.'),
+    .withMessage('Please provide a valid email.'), // or username
   check('password')
     .exists({ checkFalsy: true })
     .withMessage('Password is required'),
@@ -37,7 +37,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', validateLogin, async (req, res, next) => {
-  const { credential, password } = req.body;
+  const { email: credential, password } = req.body;
 
   const user = await User.unscoped().findOne({
     where: {
