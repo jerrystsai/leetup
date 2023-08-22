@@ -25,19 +25,38 @@ const validateSignup = [
     .isLength({ min: 1 })
     .withMessage('Please provide a last name with at least 1 character.'),
   check('email')
-    .exists({ checkFalsy: true })
-    .withMessage('You must provide a valid email.')
     .custom((value) => {return !(/\s/.test(value));})
     .withMessage('Emails must not contain any spaces.')
     .isEmail()
-    .withMessage('Please provide a valid email. (If valid email, emails may not contain any spaces.)'),
-  check('username')
+    .withMessage('Please provide a valid email. (If valid email, emails may not contain any spaces.)')
+    .custom(async (value) => {
+      console.log('------', value);
+      const selectedUserEmail = await User.findOne({
+        where: {email: value}
+      });
+      if (selectedUserEmail) throw new Error('Blah blah');
+      // ^ seems like throwing the error is what works, not the message itself
+      return !!selectedUserEmail;
+    })
+    .withMessage('User with that email already exists')
     .exists({ checkFalsy: true })
-    .withMessage('You must provide a valid username.')
+    .withMessage('You must provide a valid email.'),
+  check('username')
     .custom((value) => {return !(/\s/.test(value));})
     .withMessage('Usernames must not contain any spaces.')
     .isLength({ min: 4 })
-    .withMessage('Please provide a username with at least 4 characters.'),
+    .withMessage('Please provide a username with at least 4 characters.')
+    .custom(async (value) => {
+      const selectedUserUsername = await User.findOne({
+        where: {username: value}
+      });
+      if (selectedUserUsername) throw new Error('Blah blah');
+      // ^ seems like throwing the error is what works, not the message itself
+      return !!selectedUserUsername;
+    })
+    .withMessage('User with that username already exists')
+    .exists({ checkFalsy: true })
+    .withMessage('You must provide a valid username.'),
   check('username')
     .not()
     .isEmail()
