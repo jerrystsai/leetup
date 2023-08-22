@@ -24,9 +24,11 @@ module.exports = (sequelize, DataTypes) => {
       });
       Group.hasMany(models.Event, {
         foreignKey: 'groupId',
+        onDelete: 'cascade'
       });
       Group.hasMany(models.Venue, {
         foreignKey: { name: 'groupId' },
+        onDelete: 'cascade'
       });
       Group.hasMany(models.Image, {
         foreignKey: 'imageableId',
@@ -34,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         scope: {
           imageableType: 'Group'
         },
+        onDelete: 'cascade',
         as: 'GroupImages'
       });
     }

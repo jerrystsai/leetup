@@ -26,6 +26,54 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
+router.delete('/:groupId/images/:imageId', requireAuth, async (req, res) => {
+  const { groupId, imageId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+  if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const selectedImage = await Image.findOne({
+      attributes: ['id', 'imageableId', 'imageableType'],
+      where: {
+        id: imageId,
+        imageableId: groupId,
+        imageableType: 'Group'
+      }
+    });
+
+    if (!selectedImage) {
+      res.status(404).json({
+        message: "Group Image couldn't be found"
+      });
+    } else {
+      await selectedImage.destroy();
+
+      res.status(200).json({
+        message: "Successfully deleted"
+      });
+    }
+  }
+});
+
+
 // Get all Members of a Group specified by its id
 router.get('/:groupId/members', async (req, res) => {
   const { groupId } = req.params;
@@ -348,6 +396,55 @@ router.put('/:groupId/members', requireAuth, validateMemberStatus, async (req, r
 //     }
 //   }
 // });
+
+
+// Delete membership to a group specified by id
+router.delete('/:groupId/members', requireAuth, async (req, res) => {
+  const { groupId } = req.params;
+  const userId = +req.user.id;
+  const { memberId } = req.body;
+
+  const selectedGroup = await Group.findByPk(groupId, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+  const selectedMember = await User.findByPk(memberId);
+  const selectedMemberGroupMembership = await GroupMember.findOne({
+    attributes: ['id', 'groupId', 'userId', 'status'],
+    where: {groupId, userId: memberId}
+  });
+
+  if (!selectedMember) {
+    res.status(400).json({
+      message: "Validation Error",
+      errors: {
+        memberId: "User couldn't be found"
+      }
+    });
+  } else if (!selectedGroup) {
+    res.status(404).json({
+      message: "Group couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId) && userId !== memberId) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else if (!selectedMemberGroupMembership) {
+    res.status(404).json({
+      message: "Membership does not exist for this User"
+    });
+  } else {
+    await selectedMemberGroupMembership.destroy();
+
+    res.status(200).json({message: "Successfully deleted membership from group"});
+  }
+});
 
 
 // Get All Venues for a Group specified by its id
@@ -859,8 +956,7 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
       message: "Forbidden"
     });
   } else {
-    const specificGroup = await Group.findByPk(groupId, {
-    });
+    const specificGroup = await Group.findByPk(groupId);
 
     await specificGroup.destroy();
 

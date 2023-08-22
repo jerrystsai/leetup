@@ -26,6 +26,57 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
+router.delete('/:eventId/images/:imageId', requireAuth, async (req, res) => {
+  const { eventId, imageId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedEventGroupId = await Event.findByPk(eventId);
+  const groupIdOfSelectedEvent = selectedEventGroupId.groupId;
+
+  const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
+  const groupCohosts = await GroupMember.findAll({
+    attributes: ['userId'],
+    where: {
+      groupId: groupIdOfSelectedEvent,
+      status: 'co-host'
+    },
+    raw: true
+  });
+  const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+  if (!selectedEventGroupId) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+  } else {
+    const selectedImage = await Image.findOne({
+      attributes: ['id', 'imageableId', 'imageableType'],
+      where: {
+        id: imageId,
+        imageableId: eventId,
+        imageableType: 'Event'
+      }
+    });
+
+    if (!selectedImage) {
+      res.status(404).json({
+        message: "Event Image couldn't be found"
+      });
+    } else {
+      await selectedImage.destroy();
+
+      res.status(200).json({
+        message: "Successfully deleted"
+      });
+    }
+  }
+});
+
+
 // Get all Attendees of an Event specified by its id
 router.get('/:eventId/attendees', async (req, res) => {
   const { eventId } = req.params;
@@ -245,6 +296,80 @@ router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (re
 });
 
 
+// Delete attendance to event specified by id
+router.delete('/:eventId/attendees', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const userId = +req.user.id;
+  const { userId: attendeeId } = req.body
+
+  console.log(eventId, userId, attendeeId);
+
+  const selectedEvent = await Event.findByPk(eventId, {
+    attributes: [],
+    include: [
+        {
+          model: User,
+          as: 'Attendees',
+          through: {
+            attributes: ['status'],
+            as: 'Attendance'
+          }
+        },
+      ],
+  });
+
+  if (!selectedEvent) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else {
+    const selectedEventGroupId = await Event.findByPk(eventId);
+    const groupIdOfSelectedEvent = selectedEventGroupId.groupId;
+
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
+    const groupCohosts = await GroupMember.findAll({
+      attributes: ['userId'],
+      where: {
+        groupId: groupIdOfSelectedEvent,
+        status: 'co-host'
+      },
+      raw: true
+    });
+    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+    const selectedAttendee = await User.findByPk(attendeeId);
+    const selectedAttendeeEventAttendance = await EventAttendee.findOne({
+      attributes: ['id', 'eventId', 'userId', 'status'],
+      where: {eventId, userId: attendeeId}
+    });
+
+    if (!selectedAttendee) {
+      res.status(404).json({
+        message: "Attendance does not exist for this User"
+      });
+      // res.status(400).json({
+      //   message: "Validation Error",
+      //   errors: {
+      //     userId: "User couldn't be found"
+      //   }
+      // });
+    } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId) && userId !== attendeeId) {
+      res.status(403).json({
+        message: "Only the User, co-host, or organizer may delete an Attendance"
+      });
+    } else if (!selectedAttendeeEventAttendance) {
+      res.status(404).json({
+        message: "Attendance does not exist for this User"
+      });
+    } else {
+      await selectedAttendeeEventAttendance.destroy();
+
+      res.status(200).json({message: "Successfully deleted attendance from event"});
+    }
+  }
+});
+
+
 // Add an Image to a Event based on the Event's id
 router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => {
   const { eventId } = req.params;
@@ -430,6 +555,47 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
     }
   }
 });
+
+
+// Delete an Event specified by its id
+router.delete('/:eventId', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const userId = +req.user.id;
+
+  const selectedEvent = await Event.findByPk(eventId);
+
+  if (!selectedEvent) {
+    res.status(404).json({
+      message: "Event couldn't be found"
+    });
+  } else {
+    const groupIdOfSelectedEvent = selectedEvent.groupId;
+
+    const selectedGroup = await Group.findByPk(groupIdOfSelectedEvent, {attributes: ['organizerId']});
+    const groupCohosts = await GroupMember.findAll({
+      attributes: ['userId'],
+      where: {
+        groupId: groupIdOfSelectedEvent,
+        status: 'co-host'
+      },
+      raw: true
+    });
+    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+
+    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+      res.status(403).json({
+        message: "Forbidden"
+      });
+    } else {
+      const eventToDelete = await Event.findByPk(eventId);
+
+      await eventToDelete.destroy();
+
+      res.status(200).json({message: "Successfully deleted"});
+    }
+  }
+});
+
 
 // Get all Events
 router.get('/', async (req, res) => {

@@ -1613,7 +1613,7 @@ Delete a membership to a group specified by id.
 - Request
 
   - Method: `DELETE`
-  - URL: `/groups/:groupId/members/:memberId`
+  - URL: `/groups/:groupId/members`
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -1932,7 +1932,7 @@ Delete an attendance to an event specified by id.
 - Request
 
   - Method: `DELETE`
-  - URL: `/events/:eventId/attendees/:userId`
+  - URL: `/events/:eventId/attendees`
   - Headers:
     - Content-Type: application/json
   - Body:

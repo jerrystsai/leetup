@@ -74,6 +74,7 @@ module.exports = {
     const selectEventAttendees = [
       {eventId: 1, userId: 1},
       {eventId: 1, userId: 2},
+      {eventId: 1, userId: 6},
       {eventId: 2, userId: 2},
       {eventId: 3, userId: 1},
       {eventId: 3, userId: 3},
