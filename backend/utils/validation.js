@@ -122,12 +122,14 @@ const validateImage = [
   check('url')
     .exists({ checkFalsy: true })
     .isString()
+    .withMessage('Url must be a string')
     .isURL()
+    .withMessage('Url must be a url')
     .isLength({ max: 255})
-    .withMessage('Url must be a url'),
+    .withMessage('Url must be less than 256 characters'),
   check('preview')
     .isBoolean()
-    .withMessage('Private must be a boolean'),
+    .withMessage('Preview must be a boolean'),
   handleValidationErrors
 ];
 
