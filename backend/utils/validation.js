@@ -176,7 +176,7 @@ const validatePagination = [
       if (value === undefined) {
         return true;
       } else if ((typeof value === 'string' || value instanceof String)) {
-        if (value === 'Online' || value === 'In Person') {
+        if (value === 'Online' || value === 'In person') {
           return true;
         } else {
           throw new Error('Not in the list of values');
