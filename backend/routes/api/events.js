@@ -303,8 +303,6 @@ router.delete('/:eventId/attendees', requireAuth, async (req, res) => {
   const userId = +req.user.id;
   const { userId: attendeeId } = req.body
 
-  console.log(eventId, userId, attendeeId);
-
   const selectedEvent = await Event.findByPk(eventId, {
     attributes: [],
     include: [
@@ -627,14 +625,9 @@ router.get('/', validatePagination, async (req, res) => {
   pagination.limit = size;
   pagination.offset = size * (page - 1);
 
-  if (type) {whereCriteria.type = type}
-  if (name) {whereCriteria.name = name}
-  if (startDate) {
-    const seeIt = (new Date(startDate.split(' ').join('T') + 'Z'));
-    console.log((seeIt instanceof Date) , seeIt);
-    whereCriteria.startDate = seeIt;
-    console.log(whereCriteria);
-  }
+  if (type) {whereCriteria.type = type;}
+  if (name) {whereCriteria.name = name;}
+  if (startDate) {whereCriteria.startDate = startDate;}
 
   const allEvents = await Event.findAll({
   include: [
