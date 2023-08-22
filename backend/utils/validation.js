@@ -152,6 +152,37 @@ const validateAttendeeStatus = [
   handleValidationErrors
 ];
 
+const validatePagination = [
+  check('page')
+    .isInt({ min: 1, allow_leading_zeroes: false })
+    .withMessage("Page must be greater than or equal to 1"),
+  check('size')
+    .isInt({ min: 1, allow_leading_zeroes: false })
+    .withMessage("Size must be greater than or equal to 1"),
+  check('name')
+    .custom(async (value) => {
+      return ((typeof value === 'string' || value instanceof String) || value === undefined);
+    })
+    .withMessage('Name must be a string'),
+  check('type')
+    .custom(async (value) => {
+      return ((typeof value === 'string' || value instanceof String) || value === undefined);
+    })
+    .withMessage("Type must be a string"),
+  check('startDate')
+    .custom(async (value) => {
+      if (value === undefined) return true;
+      else {
+        const supposedDate = value + 'T00:00:00.000Z';
+        const isBadDate = isNaN(Date.parse(supposedDate));
+        if (isBadDate) throw new Error("blah blah");
+        return isBadDate;
+      }
+    })
+    .withMessage("Start date must be a valid date or null"),
+  handleValidationErrors
+];
+
 module.exports = {
   handleValidationErrors,
   validateGroup,
@@ -160,5 +191,6 @@ module.exports = {
   validateImage,
   validateGroupId,
   validateMemberStatus,
-  validateAttendeeStatus
+  validateAttendeeStatus,
+  validatePagination
 };
