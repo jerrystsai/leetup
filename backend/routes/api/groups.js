@@ -14,7 +14,9 @@ const {
   validateImage,
   validateGroupId,
   validateMemberStatus,
-  validateAttendeeStatus
+  validateAttendeeStatus,
+  validateMemberId,
+  validateUserId,
 } = require('../../utils/validation');
 
 const { User, Group, Image, Venue, GroupMember, Event, EventAttendee } = require('../../db/models');
@@ -26,6 +28,7 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
+// Delete an Image for a Group
 router.delete('/:groupId/images/:imageId', requireAuth, async (req, res) => {
   const { groupId, imageId } = req.params;
   const userId = +req.user.id;
@@ -396,7 +399,7 @@ router.put('/:groupId/members', requireAuth, validateMemberStatus, async (req, r
 
 
 // Delete membership to a group specified by id
-router.delete('/:groupId/members', requireAuth, validateMemberStatus, async (req, res) => {
+router.delete('/:groupId/members', requireAuth, validateMemberId, async (req, res) => {
   const { groupId } = req.params;
   const userId = +req.user.id;
   const { memberId } = req.body;

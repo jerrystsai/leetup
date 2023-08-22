@@ -147,12 +147,27 @@ const validateMemberStatus = [
   handleValidationErrors
 ];
 
+const validateMemberId = [
+  check('memberId')
+    .isInt({min: 1, allow_leading_zeroes: false})
+    .withMessage("MemberId must be an integer greater than 0"),
+  handleValidationErrors
+];
+
 const validateAttendeeStatus = [
   check('status')
     .isIn(['attending', 'waitlist', 'pending'])
     .withMessage("Status must be 'attending', 'waitlist', or 'pending'"),
   handleValidationErrors
 ];
+
+const validateUserId = [
+  check('userId')
+    .isInt({min: 1, allow_leading_zeroes: false})
+    .withMessage("UserId must be an integer greater than 0"),
+  handleValidationErrors
+];
+
 
 const validatePagination = [
   check('page')
@@ -229,5 +244,7 @@ module.exports = {
   validateGroupId,
   validateMemberStatus,
   validateAttendeeStatus,
+  validateMemberId,
+  validateUserId,
   validatePagination
 };
