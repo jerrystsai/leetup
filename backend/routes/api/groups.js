@@ -94,41 +94,43 @@ router.get('/:groupId/members', async (req, res) => {
     res.status(404).json({
       message: "Group couldn't be found"
     });
-  } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
-    const membersOfSpecificGroup = await Group.findByPk(groupId, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Members',
-          attributes: ['id', 'firstName', 'lastName'],
-          through: {
-            attributes: ['status'],
-            as: 'Membership',
-            where: { [Op.not]: {status: 'pending'} }
-          },
-        }
-      ]
-    });
-
-    return membersOfSpecificGroup ? res.json(membersOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
   } else {
-    const membersOfSpecificGroup = await Group.findByPk(groupId, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Members',
-          attributes: ['id', 'firstName', 'lastName'],
-          through: {
-            attributes: ['status'],
-            as: 'Membership'
-          }
+    const membersOfSpecificGroup = await GroupMember.findAll({
+        attributes: ['userId', 'status'],
+        where: { groupId }
+      }).then(res => {
+        if (res) {
+          return res.map( memberObj => memberObj.userId);
+        } else {
+          return null;
         }
-      ]
+      });
+
+    const membersStatusOfSpecificGroup = await GroupMember.findAll({
+      attributes: ['userId', 'status'],
+      where: { groupId }
+    }).then(res => res.reduce( (dict, memberObj) => {
+      dict[memberObj.userId] = memberObj.status;
+      return dict;
+    }, {} ));
+
+    const mmembersUserInfo = await User.findAll({
+      attributes: ['id', 'firstName', 'lastName'],
+      where: {id: membersOfSpecificGroup},
+      raw: true
     });
 
-    return membersOfSpecificGroup ? res.json(membersOfSpecificGroup): res.status(404).json({message: "Group couldn't be found"});
+    const membersInfo = mmembersUserInfo.map( memObj => {
+      memObj['Membership'] = {'status': membersStatusOfSpecificGroup[memObj.id]};
+      return memObj;
+    });
+
+    if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
+      const membersInfoWithoutPending = membersInfo.filter( memObj => memObj.Membership.status !== 'pending');
+      res.status(200).json(membersInfoWithoutPending);
+    } else {
+      res.status(200).json(membersInfo);
+    }
   }
 });
 

@@ -139,7 +139,7 @@ router.get('/:eventId/attendees', async (req, res) => {
     if (selectedGroup.organizerId === userId || groupCohostsArray.includes(userId)) {
       res.status(200).json(attendeesInfo);
     } else {
-      attendeesInfoWithoutPending = attendeesInfo.filter( attObj => attObj.Attendance.status !== 'pending');
+      const attendeesInfoWithoutPending = attendeesInfo.filter( attObj => attObj.Attendance.status !== 'pending');
       res.status(200).json(attendeesInfoWithoutPending);
     }
   }
@@ -515,24 +515,22 @@ router.get('/:eventId', async (req, res) => {
       },
       {
         model: Venue,
-        attributes: ['id', 'city', 'state'],
+        attributes: ['id', 'city', 'state', 'lat', 'lng'],
       }
     ]
-  });
+  }).then( res => res ? res.toJSON() : null);
 
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
   });
 
-  const eventImages = await Image.findAll(
-    {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
-  )
-  const selectedEventJSON = selectedEvent.toJSON();
-  selectedEventJSON['EventImages'] = eventImages;
-
-  if (selectedEventJSON) {
-    selectedEventJSON['numAttending'] = selectedEventAttendeeCount.length;
-    res.json(selectedEventJSON);
+  if (selectedEvent) {
+    selectedEvent['numAttending'] = selectedEventAttendeeCount.length;
+    const eventImages = await Image.findAll(
+      {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
+    )
+    selectedEvent['EventImages'] = eventImages;
+    res.json(selectedEvent);
   } else {
     res.status(404).json({message: "Event couldn't be found"});
   }
