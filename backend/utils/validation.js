@@ -154,11 +154,11 @@ const validateAttendeeStatus = [
 
 const validatePagination = [
   check('page')
-    .isInt({ min: 1, allow_leading_zeroes: false })
-    .withMessage("Page must be greater than or equal to 1"),
+    .isInt({ min: 1, max: 10, allow_leading_zeroes: false })
+    .withMessage("Page must be greater than zero and less than 10"),
   check('size')
-    .isInt({ min: 1, allow_leading_zeroes: false })
-    .withMessage("Size must be greater than or equal to 1"),
+    .isInt({ min: 1, max: 20, allow_leading_zeroes: false })
+    .withMessage("Size must be greater than zero and less than 20"),
   check('name')
     .custom(async (value) => {
       return ((typeof value === 'string' || value instanceof String) || value === undefined);

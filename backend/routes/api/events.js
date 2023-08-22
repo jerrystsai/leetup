@@ -612,6 +612,14 @@ router.delete('/:eventId', requireAuth, async (req, res) => {
 
 // Get all Events
 router.get('/', validatePagination, async (req, res) => {
+
+  const { page, size, name, type, startDate } = req.query;
+
+  const pagination = {};
+
+  if (isNaN(page) || page === undefined || parseInt(page) < 1) page = 1;
+  if (isNaN(size) || size === undefined || parseInt(size) < 1) size = 20;
+
   const allEvents = await Event.findAll({
   include: [
       {
