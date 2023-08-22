@@ -433,6 +433,71 @@ router.post('/:eventId/images', requireAuth, validateImage, async (req, res) => 
 });
 
 
+// Add Query Filters to Get All Events
+router.get('/all', validatePagination, async (req, res) => {
+
+  let { page, size, name, type, startDate } = req.query;
+
+  const pagination = {};
+  const whereCriteria = {};
+
+  if (isNaN(page) || page === undefined || parseInt(page) < 1 || parseInt(page) > 10) page = 1;
+  if (isNaN(size) || size === undefined || parseInt(size) < 1 || parseInt(size) > 20) size = 20;
+
+  page = +page;
+  size = +size;
+
+  pagination.limit = size;
+  pagination.offset = size * (page - 1);
+
+  if (type) {whereCriteria.type = type;}
+  if (name) {whereCriteria.name = name;}
+  if (startDate) {whereCriteria.startDate = startDate;}
+
+  const allEvents = await Event.findAll({
+  include: [
+      {
+        model: Image,
+        attributes: ['url'],
+        where: { preview: true },
+        required: false,
+        as: 'EventImages'
+      },
+      {
+        model: Group,
+        attributes: ['id', 'name', 'city', 'state'],
+      },
+      {
+        model: Venue,
+        attributes: ['id', 'city', 'state'],
+      }
+    ],
+    attributes: {
+      exclude: ['description', 'capacity', 'price']
+    },
+    where: whereCriteria,
+    ...pagination
+  });
+
+  const allEventsArray = allEvents.map(event => {
+    const eventData = event.dataValues;
+    eventData['previewImage'] = eventData['EventImages'].length > 0 ? eventData.EventImages[0]['url'] : null;
+    delete eventData['EventImages']
+    return eventData;
+  });
+
+  const allEventsAttendeesCount = await EventAttendee.findAll({
+    attributes: ['eventId', [sequelize.fn('COUNT', 'eventId'), 'numAttending']],
+    where: {status: ['attending']},
+    group: ['eventId']
+  });
+
+  const allEventsArrayGrafted = graftValues(allEventsArray, 'id', allEventsAttendeesCount, 'eventId', 'numAttending', 0);
+
+  return res.json({Events: allEventsArrayGrafted});
+});
+
+
 // Get details of an Event specified by its id
 router.get('/:eventId', async (req, res) => {
   const { eventId } = req.params;
@@ -609,25 +674,7 @@ router.delete('/:eventId', requireAuth, async (req, res) => {
 
 
 // Get all Events
-router.get('/', validatePagination, async (req, res) => {
-
-  let { page, size, name, type, startDate } = req.query;
-
-  const pagination = {};
-  const whereCriteria = {};
-
-  if (isNaN(page) || page === undefined || parseInt(page) < 1 || parseInt(page) > 10) page = 1;
-  if (isNaN(size) || size === undefined || parseInt(size) < 1 || parseInt(size) > 20) size = 20;
-
-  page = +page;
-  size = +size;
-
-  pagination.limit = size;
-  pagination.offset = size * (page - 1);
-
-  if (type) {whereCriteria.type = type;}
-  if (name) {whereCriteria.name = name;}
-  if (startDate) {whereCriteria.startDate = startDate;}
+router.get('/', async (req, res) => {
 
   const allEvents = await Event.findAll({
   include: [
@@ -649,9 +696,7 @@ router.get('/', validatePagination, async (req, res) => {
     ],
     attributes: {
       exclude: ['description', 'capacity', 'price']
-    },
-    where: whereCriteria,
-    ...pagination
+    }
   });
 
   const allEventsArray = allEvents.map(event => {

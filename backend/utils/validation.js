@@ -154,11 +154,29 @@ const validateAttendeeStatus = [
 
 const validatePagination = [
   check('page')
-    .isInt({ min: 1, max: 10, allow_leading_zeroes: false })
-    .withMessage("Page must be greater than zero and less than 10"),
+    .custom(async (value) => {
+      if (value === undefined) {
+        return true;
+      } else if (!isNaN(value)) {
+        return true;
+      } else {
+        throw new Error('Not a number')
+        return false;
+      }
+    })
+    .withMessage("Page must be greater than zero and should be less than 10"),
   check('size')
-    .isInt({ min: 1, max: 20, allow_leading_zeroes: false })
-    .withMessage("Size must be greater than zero and less than 20"),
+    .custom(async (value) => {
+      if (value === undefined) {
+        return true;
+      } else if (!isNaN(value)) {
+        return true;
+      } else {
+        throw new Error('Not a number')
+        return false;
+      }
+    })
+    .withMessage("Size must be greater than zero and should be less than 20"),
   check('name')
     .custom(async (value) => {
       if (value === undefined) {
