@@ -587,9 +587,21 @@ router.delete('/:eventId', requireAuth, async (req, res) => {
         message: "Forbidden"
       });
     } else {
-      const eventToDelete = await Event.findByPk(eventId);
+      // const eventToDelete = await Event.findByPk(eventId);
+      // await eventToDelete.destroy();
 
-      await eventToDelete.destroy();
+      await EventAttendee.destroy({
+        where: {eventId}
+      });
+
+      await Image.destroy({
+        where: {imageableId: eventId}
+      });
+
+      await Event.destroy({
+        where: {id: eventId}
+      });
+
 
       res.status(200).json({message: "Successfully deleted"});
     }
@@ -639,15 +651,5 @@ router.get('/', async (req, res) => {
 
   return res.json({Events: allEventsArrayGrafted});
 });
-
-
-// // Create a Group
-// router.post('/', requireAuth, validateGroup, async (req, res) => {
-//   const { name, about, type, private, city, state } = req.body;
-//   const organizerId = +req.user.id;
-//   const group = await Group.create({ organizerId, name, about, type, private, city, state });
-
-//   res.status(201).json(group);
-// });
 
 module.exports = router;

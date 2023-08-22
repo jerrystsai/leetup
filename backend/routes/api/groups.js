@@ -441,7 +441,6 @@ router.delete('/:groupId/members', requireAuth, async (req, res) => {
     });
   } else {
     await selectedMemberGroupMembership.destroy();
-
     res.status(200).json({message: "Successfully deleted membership from group"});
   }
 });
@@ -956,10 +955,41 @@ router.delete('/:groupId', requireAuth, async (req, res) => {
       message: "Forbidden"
     });
   } else {
-    const specificGroup = await Group.findByPk(groupId);
+    const groupEvents = await Event.findAll({
+      attributes: ['id'],
+      where: { groupId },
+      raw: true,
+      nested: true
+    });
 
-    await specificGroup.destroy();
+    const groupEventIds = groupEvents.map( idObj => idObj.id );
 
+    await EventAttendee.destroy(
+      { where: {eventId: groupEventIds} }
+    );
+
+    await GroupMember.destroy(
+      { where: {groupId} }
+    );
+
+    await Image.destroy(
+      { where: {imageableId: groupId} }
+    );
+
+    await Event.destroy(
+      { where: {groupId} }
+    );
+
+    await Venue.destroy(
+      { where: {groupId} }
+    );
+
+    await Group.destroy(
+      { where: {id: groupId} }
+    );
+
+    // const specificGroup = await Group.findByPk(groupId);
+    // await specificGroup.destroy();
     res.status(200).json({message: "Successfully deleted"});
   }
 });
