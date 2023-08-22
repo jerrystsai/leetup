@@ -14,7 +14,8 @@ const {
   validateImage,
   validateGroupId,
   validateMemberStatus,
-  validateAttendeeStatus
+  validateAttendeeStatus,
+  validatePagination
 } = require('../../utils/validation');
 
 const { User, Group, Image, Venue, GroupMember, Event, EventAttendee } = require('../../db/models');
@@ -610,7 +611,7 @@ router.delete('/:eventId', requireAuth, async (req, res) => {
 
 
 // Get all Events
-router.get('/', async (req, res) => {
+router.get('/', validatePagination, async (req, res) => {
   const allEvents = await Event.findAll({
   include: [
       {
