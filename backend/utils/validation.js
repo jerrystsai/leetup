@@ -161,20 +161,40 @@ const validatePagination = [
     .withMessage("Size must be greater than zero and less than 20"),
   check('name')
     .custom(async (value) => {
-      return ((typeof value === 'string' || value instanceof String) || value === undefined);
+      if (value === undefined) {
+        return true;
+      } else if ((typeof value === 'string' || value instanceof String)) {
+        const selectedEvent = await Event.findOne({where: {name: value} });
+        if (!selectedEvent) throw new Error('Blah blah');
+        // ^ seems like throwing the error is what works, not the message itself
+        return !!selectedEvent;
+      }
     })
-    .withMessage('Name must be a string'),
+    .withMessage('Name must be an actual name of at least one event'),
   check('type')
     .custom(async (value) => {
-      return ((typeof value === 'string' || value instanceof String) || value === undefined);
+      if (value === undefined) {
+        return true;
+      } else if ((typeof value === 'string' || value instanceof String)) {
+        if (value === 'Online' || value === 'In Person') {
+          return true;
+        } else {
+          throw new Error('Not in the list of values');
+        // ^ seems like throwing the error is what works, not the message itself
+          return !!selectedEvent;
+        }
+      }
     })
-    .withMessage("Type must be a string"),
+    .withMessage("Type must be a string of either 'Online' or 'In person'"),
   check('startDate')
     .custom(async (value) => {
+      console.log('----', value);
       if (value === undefined) return true;
       else {
-        const supposedDate = value + 'T00:00:00.000Z';
+        const supposedDate = value.split(' ').join('T') + 'Z';
+        console.log('-----------', supposedDate);
         const isBadDate = isNaN(Date.parse(supposedDate));
+        console.log('isBadDate', isBadDate);
         if (isBadDate) throw new Error("blah blah");
         return isBadDate;
       }

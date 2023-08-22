@@ -613,12 +613,23 @@ router.delete('/:eventId', requireAuth, async (req, res) => {
 // Get all Events
 router.get('/', validatePagination, async (req, res) => {
 
-  const { page, size, name, type, startDate } = req.query;
+  let { page, size, name, type, startDate } = req.query;
 
   const pagination = {};
+  const whereCriteria = {};
 
-  if (isNaN(page) || page === undefined || parseInt(page) < 1) page = 1;
-  if (isNaN(size) || size === undefined || parseInt(size) < 1) size = 20;
+  if (isNaN(page) || page === undefined || parseInt(page) < 1 || parseInt(page) > 10) page = 1;
+  if (isNaN(size) || size === undefined || parseInt(size) < 1 || parseInt(size) > 20) size = 20;
+
+  page = +page;
+  size = +size;
+
+  pagination.limit = size;
+  pagination.offset = size * (page - 1);
+
+  if (type) {whereCriteria.type = type}
+  if (name) {whereCriteria.name = name}
+  if (startDate) {whereCriteria.startDate = (new Date(startDate)).toISOString();}
 
   const allEvents = await Event.findAll({
   include: [
@@ -641,6 +652,8 @@ router.get('/', validatePagination, async (req, res) => {
     attributes: {
       exclude: ['description', 'capacity', 'price']
     },
+    where: whereCriteria,
+    ...pagination
   });
 
   const allEventsArray = allEvents.map(event => {
