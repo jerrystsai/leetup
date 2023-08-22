@@ -629,7 +629,12 @@ router.get('/', validatePagination, async (req, res) => {
 
   if (type) {whereCriteria.type = type}
   if (name) {whereCriteria.name = name}
-  if (startDate) {whereCriteria.startDate = (new Date(startDate)).toISOString();}
+  if (startDate) {
+    const seeIt = (new Date(startDate.split(' ').join('T') + 'Z'));
+    console.log((seeIt instanceof Date) , seeIt);
+    whereCriteria.startDate = seeIt;
+    console.log(whereCriteria);
+  }
 
   const allEvents = await Event.findAll({
   include: [

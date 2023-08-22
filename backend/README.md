@@ -894,7 +894,7 @@ Returns all the events.
           "groupId": 1,
           "venueId": 1,
           "name": "Tennis Singles",
-          "type": "In Person",
+          "type": "In person",
           "startDate": "2021-11-20 20:00:00",
           "endDate": "2021-11-19 22:00:00",
           "numAttending": 4,
@@ -959,7 +959,7 @@ Returns all the events of a group specified by its id
           "groupId": 1,
           "venueId": 1,
           "name": "Tennis Singles",
-          "type": "In Person",
+          "type": "In person",
           "startDate": "2021-11-20 20:00:00",
           "endDate": "2021-11-19 22:00:00",
           "numAttending": 4,
@@ -2125,7 +2125,7 @@ Return events filtered by query parameters.
           "groupId": 1,
           "venueId": 1,
           "name": "Tennis Singles",
-          "type": "In Person",
+          "type": "In person",
           "startDate": "2021-11-20 20:00:00",
           "endDate": "2021-11-19 22:00:00",
           "numAttending": 4,
@@ -2160,7 +2160,7 @@ Return events filtered by query parameters.
         "page": "Page must be greater than or equal to 1",
         "size": "Size must be greater than or equal to 1",
         "name": "Name must be a string",
-        "type": "Type must be 'Online' or 'In Person'",
+        "type": "Type must be 'Online' or 'In person'",
         "startDate": "Start date must be a valid datetime"
       }
     }
