@@ -11,7 +11,7 @@ const { ValidationError } = require('sequelize');
 // Imports, internal
 const { environment } = require('./config');
 const isProduction = environment === 'production';
-console.log('--- is Production', isProduction, environment);
+
 // Initialize app
 const app = express();
 
@@ -68,6 +68,7 @@ app.use((err, _req, _res, next) => {
     }
     err.title = 'Validation error';
     err.errors = errors;
+    err.stack: isProduction ? null : err.stack
   }
   next(err);
 });
