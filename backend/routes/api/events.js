@@ -83,19 +83,7 @@ router.get('/:eventId/attendees', async (req, res) => {
   const { eventId } = req.params;
   const userId = +req.user.id;
 
-  const selectedEvent = await Event.findByPk(eventId, {
-    attributes: [],
-    include: [
-        {
-          model: User,
-          as: 'Attendees',
-          through: {
-            attributes: ['status'],
-            as: 'Attendance'
-          }
-        },
-      ],
-  });
+  const selectedEvent = await Event.findByPk(eventId);
 
   if (!selectedEvent) {
     res.status(404).json({
@@ -116,26 +104,43 @@ router.get('/:eventId/attendees', async (req, res) => {
       },
       raw: true
     });
-    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
+    const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId );
+
+    const attendeesOfSelectedEvent = await EventAttendee.findAll({
+      attributes: ['userId', 'status'],
+      where: { eventId }
+    }).then(res => {
+      if (res) {
+        return res.map( attendeeObj => attendeeObj.userId);
+      } else {
+        return null;
+      }
+    });
+
+    const attendeesStatusOfSelectedEvent = await EventAttendee.findAll({
+      attributes: ['userId', 'status'],
+      where: { eventId }
+    }).then(res => res.reduce( (dict, attendeeObj) => {
+      dict[attendeeObj.userId] = attendeeObj.status;
+      return dict;
+    }, {} ));
+
+    const attendeesUserInfo = await User.findAll({
+      attributes: ['id', 'firstName', 'lastName'],
+      where: {id: attendeesOfSelectedEvent},
+      raw: true
+    });
+
+    const attendeesInfo = attendeesUserInfo.map( attObj => {
+      attObj['Attendance'] = {'status': attendeesStatusOfSelectedEvent[attObj.id]};
+      return attObj;
+    })
 
     if (selectedGroup.organizerId === userId || groupCohostsArray.includes(userId)) {
-      res.status(200).json(selectedEvent);
+      res.status(200).json(attendeesInfo);
     } else {
-      const selectedEventWithoutPending = await Event.findByPk(eventId, {
-        attributes: [],
-        include: [
-            {
-              model: User,
-              as: 'Attendees',
-              through: {
-                attributes: ['status'],
-                as: 'Attendance',
-                where: { [Op.not]: { status: 'pending' }}
-              }
-            },
-          ],
-      });
-      res.status(200).json(selectedEventWithoutPending);
+      attendeesInfoWithoutPending = attendeesInfo.filter( attObj => attObj.Attendance.status !== 'pending');
+      res.status(200).json(attendeesInfoWithoutPending);
     }
   }
 });
@@ -519,9 +524,15 @@ router.get('/:eventId', async (req, res) => {
     where: {status: ['attending'], eventId},
   });
 
-  if (selectedEvent) {
-    selectedEvent.dataValues['numAttending'] = selectedEventAttendeeCount.length;
-    res.json(selectedEvent);
+  const eventImages = await Image.findAll(
+    {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
+  )
+  const selectedEventJSON = selectedEvent.toJSON();
+  selectedEventJSON['EventImages'] = eventImages;
+
+  if (selectedEventJSON) {
+    selectedEventJSON['numAttending'] = selectedEventAttendeeCount.length;
+    res.json(selectedEventJSON);
   } else {
     res.status(404).json({message: "Event couldn't be found"});
   }
