@@ -130,9 +130,9 @@ router.get('/:groupId/members', async (req, res) => {
 
     if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId)) {
       const membersInfoWithoutPending = membersInfo.filter( memObj => memObj.Membership.status !== 'pending');
-      res.status(200).json(membersInfoWithoutPending);
+      res.status(200).json({"Members": membersInfoWithoutPending});
     } else {
-      res.status(200).json(membersInfo);
+      res.status(200).json({"Members": membersInfo});
     }
   }
 });
