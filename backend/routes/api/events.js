@@ -520,6 +520,9 @@ router.get('/:eventId', async (req, res) => {
     ]
   }).then( res => res ? res.toJSON() : null);
 
+  // Correction because Postgres converts decimal into string
+  selectedEvent.price = Number(selectedEvent.price);
+
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
   });
