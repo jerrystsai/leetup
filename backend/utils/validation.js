@@ -103,10 +103,10 @@ const validateEvent = [
     .isInt({ min: 2})
     .withMessage('Capacity must be an integer greater than 1'),
   check('price')
-    .isFloat({ min: 0 })
-    .withMessage('Price must be a number greater than or equal to zero')
+    .isFloat({ min: 0, max: 999999.99 })
+    .withMessage('Price must be a number greater than or equal to zero and less than one million')
     .isDecimal()
-    .withMessage('Price must be a number greater than or equal to zero'),
+    .withMessage('Price must be a number greater than or equal to zero and less than one million'),
   check('startDate')
     .isAfter()
     .withMessage('Start date must be in the future'),

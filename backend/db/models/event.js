@@ -75,12 +75,13 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     price: {
-      type: DataTypes.DECIMAL,
+      type: DataTypes.DECIMAL(8,2),
       validate: {
         isDecimal: {
           msg: "Price is invalid"
         },
         min: 0,
+        max: 999999.99
       },
     },
     startDate: {

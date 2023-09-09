@@ -515,24 +515,28 @@ router.get('/:eventId', async (req, res) => {
       },
       {
         model: Venue,
-        attributes: ['id', 'city', 'state', 'lat', 'lng'],
+        attributes: ['id', 'address', 'city', 'state', 'lat', 'lng'],
       }
     ]
   }).then( res => res ? res.toJSON() : null);
-
-  // Correction because Postgres converts decimal into string
-  selectedEvent.price = Number(selectedEvent.price);
 
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
   });
 
   if (selectedEvent) {
+    // Get numAttending
     selectedEvent['numAttending'] = selectedEventAttendeeCount.length;
+
+    // Get Images
     const eventImages = await Image.findAll(
       {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
     )
     selectedEvent['EventImages'] = eventImages;
+
+    // Correction because Postgres converts decimal into string
+    selectedEvent.price = Number(selectedEvent.price);
+
     res.json(selectedEvent);
   } else {
     res.status(404).json({message: "Event couldn't be found"});
