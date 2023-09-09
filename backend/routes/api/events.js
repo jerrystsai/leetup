@@ -257,7 +257,7 @@ router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (re
     });
     const groupCohostsArray = groupCohosts.map( cohostObj => cohostObj.userId);
 
-    if (!selectedGroup.organizerId === userId || !groupCohostsArray.includes(userId)) {
+    if (!(selectedGroup.organizerId === userId || groupCohostsArray.includes(userId))) {
       res.status(403).json({
         message: "Forbidden"
       });
