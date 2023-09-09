@@ -743,9 +743,11 @@ router.post('/:groupId/events', requireAuth, validateEvent, async (req, res) => 
       message: "Forbidden"
     });
   } else {
-    const newEvent = await Event.create({ groupId, venueId, name, type, capacity, price, description, startDate, endDate });
+
+    const newEvent = await Event.create({ groupId, venueId, name, type, capacity, price: Number(price), description, startDate, endDate });
     const newEventConfirmed = await Event.findByPk(newEvent.id, {
     });
+
 
     res.status(200).json(newEventConfirmed);
   }
