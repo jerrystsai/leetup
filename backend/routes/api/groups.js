@@ -744,10 +744,10 @@ router.post('/:groupId/events', requireAuth, validateEvent, async (req, res) => 
     });
   } else {
 
-    const newEvent = await Event.create({ groupId, venueId, name, type, capacity, price: Number(price), description, startDate, endDate });
+    const newEvent = await Event.create({ groupId, venueId, name, type, capacity: Number(capacity), price: Number(price), description, startDate, endDate });
     const newEventConfirmed = await Event.findByPk(newEvent.id, {
     });
-
+    // newEventConfirmed.price = +newEventConfirmed.price;
 
     res.status(200).json(newEventConfirmed);
   }
