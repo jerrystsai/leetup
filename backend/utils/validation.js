@@ -77,13 +77,15 @@ const validateVenue = [
 
 const validateEvent = [
   check('venueId')
-    .isInt({ min: 1, allow_leading_zeroes: false })
-    .withMessage('Venue does not exist')
     .custom(async (value) => {
-      const selectedVenue = await Venue.findByPk(value);
-      if (!selectedVenue) throw new Error('Blah blah');
-      // ^ seems like throwing the error is what works, not the message itself
-      return !!selectedVenue;
+      if (value !== null) {
+        const selectedVenue = await Venue.findByPk(value);
+        if (!selectedVenue) throw new Error('Blah blah');
+        // ^ seems like throwing the error is what works, not the message itself
+        return !!selectedVenue;
+      } else {
+        return true;
+      }
     })
     .withMessage('Venue does not exist'),
   check('name')
