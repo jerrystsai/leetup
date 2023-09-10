@@ -620,9 +620,19 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
       const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
       const selectedVenue = await Venue.findByPk(venueId);
 
-      if (!selectedVenue && venueId !== null) {
+      // Get all venues associated with the group
+      const groupVenues = await Venue.findAll({
+        attributes: ['id'],
+        where: {
+          groupId: groupIdOfSelectedEvent,
+        },
+        raw: true
+      });
+      const groupVenuesArray = groupVenues.map( venueObj => venueObj.id);
+
+      if ( !selectedVenue || venueId === null || !groupVenuesArray.includes(venueId) ) {
         res.status(404).json({
-          message: "Venue couldn't be found"
+          message: "Venue couldn't be found / Venue not associated with the Group throwing the Event"
         });
       } else {
         const updatedEvent = await selectedEvent.update(
