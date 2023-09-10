@@ -889,7 +889,6 @@ router.get('/:groupId', async (req, res) => {
       {
         model: Image,
         // attributes: [],
-        where: { preview: true },
         required: false,
         as: 'GroupImages'
       },

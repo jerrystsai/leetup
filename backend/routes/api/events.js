@@ -273,7 +273,7 @@ router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (re
         }
       });
       if (selectedEventAttendeeArray.length === 0) {
-        res.status(400).json({
+        res.status(404).json({
           message: "Attendance between the user and the event does not exist"
         });
       } else {
