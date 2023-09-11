@@ -347,19 +347,13 @@ router.delete('/:eventId/attendees', requireAuth, validateUserId, async (req, re
       where: {eventId, userId: attendeeId}
     });
 
-    if (!selectedAttendee) {
+    if (!(selectedGroup.organizerId == userId || userId == attendeeId)) {
+      res.status(403).json({
+        message: "Only the User or organizer may delete an Attendance"
+      });
+    } else if (!selectedAttendee) {
       res.status(404).json({
         message: "Attendance does not exist for this User"
-      });
-      // res.status(400).json({
-      //   message: "Validation Error",
-      //   errors: {
-      //     userId: "User couldn't be found"
-      //   }
-      // });
-    } else if (selectedGroup.organizerId !== userId && !groupCohostsArray.includes(userId) && userId !== attendeeId) {
-      res.status(403).json({
-        message: "Only the User, co-host, or organizer may delete an Attendance"
       });
     } else if (!selectedAttendeeEventAttendance) {
       res.status(404).json({
