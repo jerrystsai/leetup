@@ -74,7 +74,7 @@ const router = express.Router();
 
 
 // Get the Current User
-router.get('/me', requireAuth, async (req, res) => {
+router.get('/me', async (req, res) => {
 
   const { user } = req;
   // console.log(user);
