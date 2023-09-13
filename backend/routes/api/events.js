@@ -612,7 +612,6 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
       });
     } else {
       const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
-      console.log('Testing ----- capacity, price ', typeof capacity, typeof price);
       const selectedVenue = await Venue.findByPk(venueId);
 
       // Get all venues associated with the group
@@ -630,11 +629,13 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
           message: "Venue couldn't be found / Venue not associated with the Group throwing the Event"
         });
       } else {
+        console.log('  typeof price: ', typeof price);
         const updatedEvent = await selectedEvent.update(
           { venueId, name, type, capacity, price, description, startDate, endDate }
         );
 
         const updatedEventConfirm = await Event.findByPk(updatedEvent.id);
+        console.log('  typeof updatedEventConfirm.price: ', typeof updatedEventConfirm.price);
         res.status(200).json(updatedEventConfirm);
       }
     }
