@@ -512,6 +512,8 @@ router.get('/:eventId', async (req, res) => {
     ]
   }).then( res => res ? res.toJSON() : null);
 
+  console.log('TESTING -- ', selectedEvent);
+
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
   });

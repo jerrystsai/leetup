@@ -118,7 +118,7 @@ router.get('/me', async (req, res) => {
 });
 
 
-// Sign up
+// Sign up a User
 router.post('/', validateSignup, validateCredentials, async (req, res) => {
   const { firstName, lastName, email, password, username } = req.body;
   const hashedPassword = bcrypt.hashSync(password);
