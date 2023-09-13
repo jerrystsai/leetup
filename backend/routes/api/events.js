@@ -612,7 +612,7 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
       });
     } else {
       const { venueId, name, type, capacity, price, description, startDate, endDate } = req.body;
-      console.log('Testing ----- capacity, price ', capacity, price);
+      console.log('Testing ----- capacity, price ', typeof capacity, typeof price);
       const selectedVenue = await Venue.findByPk(venueId);
 
       // Get all venues associated with the group
