@@ -286,16 +286,14 @@ router.put('/:eventId/attendees', requireAuth, validateAttendeeStatus, async (re
           }
         );
 
-        const selectedEventAttendeeArrayConfirmed = await EventAttendee.findAll({
-          attributes: ['userId', 'status'],
+        const selectedEventAttendeeConfirmed = await EventAttendee.findOne({
+          attributes: ['id', 'eventId', 'userId', 'status'],
           where: {
             [Op.and]: [{eventId}, {userId: attendeeId}]
           }
         });
 
-        const selectedEventAttendee = selectedEventAttendeeArrayConfirmed[0];
-
-        res.json(selectedEventAttendee);
+        res.json(selectedEventAttendeeConfirmed);
       }
     }
   }
@@ -513,6 +511,8 @@ router.get('/:eventId', async (req, res) => {
       }
     ]
   }).then( res => res ? res.toJSON() : null);
+
+  console.log('TESTING -- ', selectedEvent);
 
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
