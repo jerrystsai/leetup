@@ -183,7 +183,6 @@ router.post('/:eventId/attendees', requireAuth, async (req, res) => {
       });
     } else {
       if (userEventAttendance.length > 0) {
-        // console.log('--- userEventAttendanceStatus', userEventAttendance);
 
         const userEventAttendanceStatus = userEventAttendance[0].status;
         if (userEventAttendanceStatus === 'pending' || userEventAttendanceStatus === 'waitlist') {
@@ -512,8 +511,6 @@ router.get('/:eventId', async (req, res) => {
     ]
   }).then( res => res ? res.toJSON() : null);
 
-  console.log('TESTING -- ', selectedEvent);
-
   const selectedEventAttendeeCount = await EventAttendee.findAll({
     where: {status: ['attending'], eventId},
   });
@@ -527,9 +524,6 @@ router.get('/:eventId', async (req, res) => {
       {where: {[Op.and]: [{'imageableId': eventId}, {'imageableType': 'Event'}]}}
     )
     selectedEvent['EventImages'] = eventImages;
-
-    // Correction because Postgres converts decimal into string
-    selectedEvent.price = Number(selectedEvent.price);
 
     res.json(selectedEvent);
   } else {
@@ -629,13 +623,11 @@ router.put('/:eventId', requireAuth, validateEvent, async (req, res) => {
           message: "Venue couldn't be found / Venue not associated with the Group throwing the Event"
         });
       } else {
-        console.log('  typeof price: ', typeof price);
         const updatedEvent = await selectedEvent.update(
           { venueId, name, type, capacity, price, description, startDate, endDate }
         );
 
         const updatedEventConfirm = await Event.findByPk(updatedEvent.id);
-        console.log('  typeof updatedEventConfirm.price: ', typeof updatedEventConfirm.price);
         res.status(200).json(updatedEventConfirm);
       }
     }

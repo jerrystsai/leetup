@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     lat: {
-      type: DataTypes.DECIMAL,
+      type: DataTypes.FLOAT,
       validate: {
         isDecimal: {
           msg: "Latitude is not valid"
@@ -55,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     lng: {
-      type: DataTypes.DECIMAL,
+      type: DataTypes.FLOAT,
       validate: {
         isDecimal: {
           msg: "Latitude is not valid"
