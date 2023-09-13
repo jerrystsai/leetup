@@ -1,13 +1,56 @@
 // External
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { check } = require('express-validator');
+const { validationResult, check } = require('express-validator');
 
 // Internal
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const { handleValidationErrors } = require('../../utils/validation');
 
 const { User } = require('../../db/models');
+
+// Middleware for user-already-created errors as express-validator middleware
+const handleCredentialErrors = (req, _res, next) => {
+  const validationErrors = validationResult(req);
+
+  if (!validationErrors.isEmpty()) {
+    const errors = {};
+    validationErrors
+      .array()
+      .forEach(error => errors[error.path] = error.msg);
+
+    const err = Error("User already exists");
+    err.errors = errors;
+    err.status = 500;
+    err.title = "User already exists";
+    next(err);
+  }
+  next();
+}
+
+const validateCredentials = [
+  check('email')
+    .custom(async (value) => {
+      const selectedUserEmail = await User.findOne({
+        where: {email: value}
+      });
+      if (selectedUserEmail) throw new Error('Blah blah');
+      // ^ seems like throwing the error is what works, not the message itself
+      return !!selectedUserEmail;
+    })
+    .withMessage('User with that email already exists'),
+  check('username')
+    .custom(async (value) => {
+      const selectedUserUsername = await User.findOne({
+        where: {username: value}
+      });
+      if (selectedUserUsername) throw new Error('Blah blah');
+      // ^ seems like throwing the error is what works, not the message itself
+      return !!selectedUserUsername;
+    })
+    .withMessage('User with that username already exists'),
+  handleCredentialErrors
+];
 
 const validateSignup = [
   check('firstName')
@@ -28,33 +71,14 @@ const validateSignup = [
     .custom((value) => {return !(/\s/.test(value));})
     .withMessage('Emails must not contain any spaces.')
     .isEmail()
-    .withMessage('Please provide a valid email. (If valid email, emails may not contain any spaces.)')
-    .custom(async (value) => {
-      console.log('------', value);
-      const selectedUserEmail = await User.findOne({
-        where: {email: value}
-      });
-      if (selectedUserEmail) throw new Error('Blah blah');
-      // ^ seems like throwing the error is what works, not the message itself
-      return !!selectedUserEmail;
-    })
-    .withMessage('User with that email already exists')
+    .withMessage('Please provide a valid email address. (Email addresses may not contain any spaces.)')
     .exists({ checkFalsy: true })
-    .withMessage('You must provide a valid email.'),
+    .withMessage('You must provide a valid email address.'),
   check('username')
     .custom((value) => {return !(/\s/.test(value));})
     .withMessage('Usernames must not contain any spaces.')
     .isLength({ min: 4 })
     .withMessage('Please provide a username with at least 4 characters.')
-    .custom(async (value) => {
-      const selectedUserUsername = await User.findOne({
-        where: {username: value}
-      });
-      if (selectedUserUsername) throw new Error('Blah blah');
-      // ^ seems like throwing the error is what works, not the message itself
-      return !!selectedUserUsername;
-    })
-    .withMessage('User with that username already exists')
     .exists({ checkFalsy: true })
     .withMessage('You must provide a valid username.'),
   check('username')
@@ -63,12 +87,18 @@ const validateSignup = [
     .withMessage('Username cannot be an email.'),
   check('password')
     .exists({ checkFalsy: true })
-    .custom((value) => {return !(/\s/.test(value));})
-    .withMessage('Passwords must not contain any spaces.')
+    // .custom((value) => {return !(/\s/.test(value));})
+    // .withMessage('Passwords must not contain any spaces.')
+    .custom((value) => {return !(/^\s/.test(value));})
+    .withMessage('Passwords must not begin with or end with a space.')
+    .custom((value) => {return !(/\s$/.test(value));})
+    .withMessage('Passwords must not begin with or end with a space.')
     .isLength({ min: 6 })
     .withMessage('Password must be 6 characters or more.'),
   handleValidationErrors
 ];
+
+
 
 const router = express.Router();
 
@@ -89,7 +119,7 @@ router.get('/me', async (req, res) => {
 
 
 // Sign up
-router.post('/', validateSignup, async (req, res) => {
+router.post('/', validateSignup, validateCredentials, async (req, res) => {
   const { firstName, lastName, email, password, username } = req.body;
   const hashedPassword = bcrypt.hashSync(password);
   const user = await User.create({ firstName, lastName, email, username, hashedPassword });
