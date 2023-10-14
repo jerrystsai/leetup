@@ -2,6 +2,7 @@ import { csrfFetch } from './csrf';
 
 /** Action Type Constants: */
 export const SESSION_LOGIN = 'session/LOGIN';
+export const SESSION_MAINTAIN = 'session/MAINTAIN';
 export const SESSION_LOGOUT = 'session/LOGOUT';
 
 /**  Action Creators: */
@@ -12,6 +13,10 @@ export const loginSession = (user) => ({
 
 export const logoutSession = () => ({
   type: SESSION_LOGOUT,
+});
+
+export const maintainSession = () => ({
+  type: SESSION_MAINTAIN,
 });
 
 
@@ -32,17 +37,25 @@ export const loginSessionThunk = (payload) => async (dispatch) => {
         password
       })
     }
-  );
+  ).then( responseJSON => responseJSON.json() );
 
-  if (response.ok) {
-    const responseJSON = await response.json();
-    dispatch(loginSession(responseJSON.user))
-    return responseJSON;
-  } else {
-    const invalidLogIn = await response.json();
-    return invalidLogIn;
-  }
+  dispatch(loginSession(response.user))
+  return response;
 }
+
+
+export const maintainSessionThunk = () => async (dispatch) => {
+  const responseJSON = await csrfFetch(
+    // `/api/session`
+    `/api/login`
+  );
+  const response = await responseJSON.json();
+  dispatch(loginSession(response.user))
+  return responseJSON;
+}
+
+
+// REDUCER
 
 const sessionReducer = (state = {user: null}, action) => {
   let newState;
