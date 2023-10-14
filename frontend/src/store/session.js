@@ -43,7 +43,6 @@ export const loginSessionThunk = (payload) => async (dispatch) => {
   return response;
 }
 
-
 export const maintainSessionThunk = () => async (dispatch) => {
   const responseJSON = await csrfFetch(
     // `/api/session`
@@ -53,6 +52,27 @@ export const maintainSessionThunk = () => async (dispatch) => {
   dispatch(loginSession(response.user))
   return responseJSON;
 }
+
+export const userSignupThunk = (payload) => async (dispatch) => {
+  // payload is expected to be: {"credential": credentialExample, "password": passwordExample}
+  const { username, firstName, lastName, email, password } = payload;
+
+  const response = await csrfFetch(
+    `/api/users`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username, firstName, lastName, email, password
+      })
+    }
+  ).then( responseJSON => responseJSON.json() );
+
+  dispatch(loginSession(response.user))
+  return response;
+}
+
 
 
 // REDUCER
