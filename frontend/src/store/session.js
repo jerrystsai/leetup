@@ -74,7 +74,6 @@ export const userSignupThunk = (payload) => async (dispatch) => {
 }
 
 
-
 // REDUCER
 
 const sessionReducer = (state = {user: null}, action) => {

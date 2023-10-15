@@ -23,6 +23,7 @@ const validateLogin = [
 
 const router = express.Router();
 
+
 // Routes
 
 // Restore session user
@@ -37,7 +38,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', validateLogin, async (req, res, next) => {
-  const { credential, password } = req.body;
+  const { email: credential, password } = req.body;
 
   const user = await User.unscoped().findOne({
     where: {
@@ -49,10 +50,13 @@ router.post('/', validateLogin, async (req, res, next) => {
   });
 
   if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
+    res.status(401).json({
+      message: "Invalid credentials"
+    })
     const err = new Error('Login failed');
-    err.status = 401;
-    err.title = 'Login failed';
-    err.errors = { credential: 'The provided credentials were invalid.' };
+    // err.status = 401;
+    // err.title = 'Login failed';
+    // err.errors = { credential: 'The provided credentials were invalid.' };
     return next(err);
   }
 
@@ -64,6 +68,36 @@ router.post('/', validateLogin, async (req, res, next) => {
     user: safeUser
   });
 });
+
+// Original
+// router.post('/', validateLogin, async (req, res, next) => {
+//   const { credential, password } = req.body;
+
+//   const user = await User.unscoped().findOne({
+//     where: {
+//       [Op.or]: {
+//         username: credential,
+//         email: credential
+//       }
+//     }
+//   });
+
+//   if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
+//     const err = new Error('Login failed');
+//     err.status = 401;
+//     err.title = 'Login failed';
+//     err.errors = { credential: 'The provided credentials were invalid.' };
+//     return next(err);
+//   }
+
+//   const safeUser = user.toSafe();
+
+//   await setTokenCookie(res, safeUser);
+
+//   return res.json({
+//     user: safeUser
+//   });
+// });
 
 router.delete('/', (_req, res) => {
   res.clearCookie('token');

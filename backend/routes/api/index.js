@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const loginRouter = require('./login.js');
+// const loginRouter = require('./login.js');  Deprecated due to mandate for front-end
 const usersRouter = require('./users.js');
 const groupsRouter = require('./groups.js');
 const venuesRouter = require('./venues.js');
@@ -15,7 +15,7 @@ const { setTokenCookie, restoreUser, requireAuth } = require('../../utils/auth.j
   // If current user login isnot valid, set req.user to null
 router.use(restoreUser);
 
-router.use('/login', loginRouter);
+// router.use('/login', loginRouter);  Deprecated due to mandate for front-end
 router.use('/users', usersRouter);
 router.use('/groups', groupsRouter);
 router.use('/venues', venuesRouter);
