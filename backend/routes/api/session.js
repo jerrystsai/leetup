@@ -11,7 +11,7 @@ const { handleValidationErrors } = require('../../utils/validation');
 const { User } = require('../../db/models');
 
 const validateLogin = [
-  check('credential')
+  check('email')
     .exists({ checkFalsy: true })
     .notEmpty()
     .withMessage('Please provide a valid email or username.'),
