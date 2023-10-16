@@ -5,6 +5,7 @@ import * as sessionActions from './store/session';
 
 import LoginFormPage from './components/LoginFormPage';
 import SignupFormPage from './components/SignupFormPage';
+import Navigation from './components/Navigation';
 
 
 function App() {
@@ -15,16 +16,19 @@ function App() {
   }, [dispatch]);
 
   return (
-    isLoaded && (
-      <Switch>
-        <Route path='/session'>
-          <LoginFormPage />
-        </Route>
-        <Route path='/signup'>
-          <SignupFormPage />
-        </Route>
-      </Switch>
-    )
+    <>
+      <Navigation isLoaded={isLoaded} />
+      {isLoaded && (
+        <Switch>
+          <Route path='/session'>
+            <LoginFormPage />
+          </Route>
+          <Route path='/signup'>
+            <SignupFormPage />
+          </Route>
+        </Switch>
+      )}
+  </>
   );
 };
 
