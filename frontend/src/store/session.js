@@ -15,9 +15,9 @@ export const logoutSession = () => ({
   type: SESSION_LOGOUT,
 });
 
-export const maintainSession = () => ({
-  type: SESSION_MAINTAIN,
-});
+// export const maintainSession = () => ({
+//   type: SESSION_MAINTAIN,
+// });
 
 
 // /** Thunk Action Creators: */
@@ -70,6 +70,18 @@ export const userSignupThunk = (payload) => async (dispatch) => {
   dispatch(loginSession(response.user))
   return response;
 }
+
+export const logoutSessionThunk = () => async (dispatch) => {
+  const responseJSON = await csrfFetch(
+    `/api/session`, {
+      method: "DELETE"
+    }
+  );
+  // const response = await responseJSON.json();
+  dispatch(logoutSession());
+  return responseJSON;
+}
+
 
 
 // REDUCER
