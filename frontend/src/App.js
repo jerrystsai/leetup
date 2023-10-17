@@ -20,7 +20,7 @@ function App() {
       <Navigation isLoaded={isLoaded} />
       {isLoaded && (
         <Switch>
-          <Route path='/session'>
+          <Route path='/login'>
             <LoginFormPage />
           </Route>
           <Route path='/signup'>
