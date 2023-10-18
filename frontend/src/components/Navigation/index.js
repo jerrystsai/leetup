@@ -1,8 +1,10 @@
 import { useSelector } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 import ProfileButton from "./ProfileButton";
 // import { logoutSessionThunk } from '../../store/session';
 import './Navigation.css';
+import LoginFormModal from '../LoginFormModal';
+import OpenModalButton from "../OpenModalButton";
 
 const Navigation = ( {isLoaded} ) => {
 
@@ -26,8 +28,11 @@ const Navigation = ( {isLoaded} ) => {
   } else {
     sessionLinks = (
       <li>
+        <OpenModalButton
+          buttonText='Log In'
+          modalComponent={<LoginFormModal />}
+        />
         <NavLink to="/signup">Sign Up</NavLink>
-        <NavLink to="/login">Log In</NavLink>
       </li>
     );
   }

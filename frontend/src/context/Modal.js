@@ -39,16 +39,16 @@ export function ModalProvider({ children }) {
 }
 
 export function Modal() {
-  const {modalRef, modalContent, closeModal} = useContext(ModalContext);
-  if (modalRef && modalRef.current && modalContent) {
-    return ReactDOM.createPortal(
-      <div id='modal'>
-        <div id='modal-background' onClick={ closeModal } />
-        <div id='modal-content'>{modalContent}</div>
-      </div>,
-      modalRef.current
-    )
-  } else return null;
+  const { modalRef, modalContent, closeModal } = useContext(ModalContext);
+  if (!modalRef || !modalRef.current || !modalContent) return null;
+
+  return ReactDOM.createPortal(
+    <div id='modal'>
+      <div id='modal-background' onClick={ closeModal } />
+      <div id='modal-content'>{modalContent}</div>
+    </div>,
+    modalRef.current
+  )
 }
 
 export const useModal = () => useContext(ModalContext);
