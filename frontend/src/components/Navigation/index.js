@@ -1,23 +1,15 @@
-import { useSelector } from 'react-redux';
 import { NavLink } from "react-router-dom";
-import ProfileButton from "./ProfileButton";
-// import { logoutSessionThunk } from '../../store/session';
+import { useSelector } from 'react-redux';
 import './Navigation.css';
-import OpenModalButton from "../OpenModalButton";
 
+import ProfileButton from "./ProfileButton";
+import OpenModalButton from "../OpenModalButton";
 import LoginFormModal from '../LoginFormModal';
 import SignupFormModal from '../SignupFormModal';
 
-const Navigation = ( {isLoaded} ) => {
+const Navigation = ( { isLoaded } ) => {
 
-  // const dispatch = useDispatch();
   const sessionUser = useSelector( state => state.session.user );
-  // const dispatch = useDispatch();
-
-  // const logout = (e) => {
-  //   e.preventDefault();
-  //   dispatch(logoutSessionThunk());
-  // }
 
   let sessionLinks;
   if (sessionUser) {
