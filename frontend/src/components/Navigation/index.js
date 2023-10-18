@@ -3,8 +3,10 @@ import { NavLink } from "react-router-dom";
 import ProfileButton from "./ProfileButton";
 // import { logoutSessionThunk } from '../../store/session';
 import './Navigation.css';
-import LoginFormModal from '../LoginFormModal';
 import OpenModalButton from "../OpenModalButton";
+
+import LoginFormModal from '../LoginFormModal';
+import SignupFormModal from '../SignupFormModal';
 
 const Navigation = ( {isLoaded} ) => {
 
@@ -32,7 +34,10 @@ const Navigation = ( {isLoaded} ) => {
           buttonText='Log In'
           modalComponent={<LoginFormModal />}
         />
-        <NavLink to="/signup">Sign Up</NavLink>
+        <OpenModalButton
+          buttonText='Sign Up'
+          modalComponent={<SignupFormModal />}
+        />
       </li>
     );
   }
