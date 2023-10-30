@@ -1,3 +1,17 @@
 .hidden {
-  display: none
+  display: none;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-dropdown {
+  position: absolute;
+  text-align: left;
+}
+
+.profile-dropdown > li {
+  list-style-type: none;
 }

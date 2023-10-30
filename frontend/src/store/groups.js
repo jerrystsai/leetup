@@ -1,41 +1,180 @@
+import { csrfFetch } from './csrf';
+
 // Action type constants
-export const GET_GROUP = 'groups/GET_GROUP';
-export const GET_ALL_GROUPS = 'groups/GET_ALL_GROUPS';
+export const LOAD_GROUP = 'groups/LOAD_GROUP';
+export const LOAD_GROUP_EVENTS = 'groups/LOAD_GROUP_EVENTS';
+export const LOAD_GROUPS = 'groups/LOAD_GROUPS';
+export const ADD_GROUP = 'groups/ADD_GROUP';
+export const EDIT_GROUP = 'groups/EDIT_GROUP';
+export const REMOVE_GROUP = 'groups/REMOVE_GROUP';
 
 // Action creators
-export const getAllGroups = () => ({
-  type: GET_ALL_GROUPS,
+export const loadGroup = (group) => ({
+  type: LOAD_GROUP,
+  payload: group,
 });
 
-// Thunk action creators
-export const getAllGroupsThunk = () => async (dispatch) => {
-  const responseJSON = await csrfFetch(`/groups`);
+export const loadGroupEvents = (normEvents) => ({
+  type: LOAD_GROUP_EVENTS,
+  payload: normEvents,
+});
 
-  if (response.ok) {
-    const response = await responseJSON.json()
-    dispatch(getAllGroups());
+export const loadGroups = (groups) => ({
+  type: LOAD_GROUPS,
+  payload: groups,
+});
+
+export const addGroup = (newGroup) => ({
+  type: ADD_GROUP,
+  payload: newGroup
+});
+
+export const editGroup = (editedGroup) => ({
+  type: EDIT_GROUP,
+  payload: editedGroup
+});
+
+export const removeGroup = (deletedGroupId) => ({
+  type: REMOVE_GROUP,
+  payload: deletedGroupId
+});
+
+
+// Thunk action creators
+export const loadGroupThunk = (groupId) => async (dispatch) => {
+  const responseJSON = await fetch(`/api/groups/${groupId}`);
+
+  if (responseJSON.ok) {
+    const group = await responseJSON.json();
+    dispatch(loadGroup(group));
+    return group;
   } else {
-    // console.log('error on response for remove report')
-    // throw new Error('remove report')
+    const notOkResponse = await responseJSON.json();
+    if (notOkResponse.errors) {
+      return { errors: notOkResponse.errors };
+    }
+  }
+}
+
+export const loadGroupEventsThunk = (groupId) => async (dispatch) => {
+  const responseJSON = await fetch(`/api/groups/${groupId}/events`);
+
+  if (responseJSON.ok) {
+    const { Events: groupEvents} = await responseJSON.json();
+    const normGroupEvents = { id: groupId, events: groupEvents };
+    dispatch(loadGroupEvents(normGroupEvents));
+    return normGroupEvents;
+  } else {
+    const notOkResponse = await responseJSON.json();
+    if (notOkResponse.errors) {
+      return { errors: notOkResponse.errors };
+    }
+  }
+}
+
+export const loadGroupsThunk = () => async (dispatch) => {
+  const responseJSON = await fetch(`/api/groups`);
+
+  if (responseJSON.ok) {
+    const { Groups: groups } = await responseJSON.json();
+
+    dispatch(loadGroups(groups));
+  }
+  return responseJSON;
+}
+
+export const addGroupThunk = (groupInfo) => async (dispatch) => {
+  const responseJSON = await csrfFetch(`/api/groups`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(groupInfo),
+  });
+
+  if (responseJSON.ok) {
+    const response = await responseJSON.json()
+    dispatch(addGroup(response));
+  }
+  return responseJSON;
+}
+
+export const editGroupThunk = (groupInfo) => async (dispatch) => {
+  const responseJSON = await csrfFetch(`/api/groups/${groupInfo.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(groupInfo),
+  });
+
+  if (responseJSON.ok) {
+    const group = await responseJSON.json();
+    console.log('HERE HERE ', group);
+    dispatch(editGroup(group));
+    return group;
+  } else {
+    const notOkResponse = await responseJSON.json();
+    if (notOkResponse.errors) {
+      return { errors: notOkResponse.errors };
+    }
+  }
+}
+
+export const removeGroupThunk = (groupId) => async (dispatch) => {
+  const responseJSON = await csrfFetch(`/api/groups/${groupId}`, {
+    method: 'DELETE',
+  });
+
+  // Success does not return a group, I believe
+  if (responseJSON.ok) {
+    dispatch(removeGroup(groupId));
+    return groupId;
+  } else {
+    const notOkResponse = await responseJSON.json();
+    if (notOkResponse.errors) {
+      return { errors: notOkResponse.errors };
+    }
   }
 
 }
 
-const groupsReducer = (state = {}, action) => {
+
+// REDUCER
+const initialState = {};
+
+const groupsReducer = (state = initialState, action) => {
+  const newState = {...state};
+
   switch (action.type) {
-    case GET_ALL_GROUPS:
-      const groupsState = {};
-      action.groups.forEach((report) => {
-        groupsState[report.id] = report;
+    case LOAD_GROUP:
+      return {
+        ...newState,
+        groupDetails: { ...newState.groupDetail, [action.payload.id]: action.payload }
+      };
+    case LOAD_GROUPS:
+      const groupDescrips = {};
+      action.payload.forEach((group) => {
+        groupDescrips[group.id] = group;
       });
-      return groupsState;
-    case RECEIVE_GROUP:
-      return { ...state, [action.report.id]: action.report };
-    case UPDATE_GROUP:
-      return { ...state, [action.report.id]: action.report };
+      newState.groupDescrips = groupDescrips;
+      return newState;
+    case LOAD_GROUP_EVENTS:
+      return {
+        ...newState,
+        groupEvents: { ...newState.groupEvents, [action.payload.id]: action.payload.events }
+      };
+    case ADD_GROUP:
+      return {...newState,
+        groupDescrips: { [action.payload.id]: action.payload }
+      };
+    case EDIT_GROUP:
+      return {...newState,
+        groupDescrips: { [action.payload.id]: action.payload }
+      };
     case REMOVE_GROUP:
-      const newState = { ...state };
-      delete newState[action.reportId];
+      if (newState.groupDescrips[action.payload] )delete newState.groupDescrips[action.payload];
+      if (newState.groupDetails[action.payload] )delete newState.groupDetails[action.payload];
       return newState;
     default:
       return state;

@@ -14,14 +14,14 @@ const Navigation = ( { isLoaded } ) => {
   let sessionLinks;
   if (sessionUser) {
     sessionLinks = (
-      <li>
+      <div className="nav-credentials">
         <ProfileButton user={sessionUser} />
         {/* <button onClick={logout}>Log Out</button> */}
-      </li>
+      </div>
     );
   } else {
     sessionLinks = (
-      <li>
+      <div className="nav-credentials">
         <OpenModalButton
           buttonText='Log In'
           modalComponent={<LoginFormModal />}
@@ -30,17 +30,17 @@ const Navigation = ( { isLoaded } ) => {
           buttonText='Sign Up'
           modalComponent={<SignupFormModal />}
         />
-      </li>
+      </div>
     );
   }
 
   return (
-    <ul>
-      <li>
-        <NavLink exact to="/">Home</NavLink>
-      </li>
+    <div className="nav">
+      <div className="nav-logo">
+        <NavLink exact to="/"><img src="./images/leetup-logo.png" alt="Leetup Home" height="30px" /></NavLink>
+      </div>
       {isLoaded && sessionLinks}
-    </ul>
+    </div>
   );
 }
 

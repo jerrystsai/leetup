@@ -1,0 +1,10 @@
+div {
+  padding: 10px
+}
+
+.disabled {
+  pointer-events: none;
+  cursor: pointer;
+  color: #888888;
+  text-decoration: none;
+}
