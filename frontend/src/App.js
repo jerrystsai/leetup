@@ -16,35 +16,40 @@ function App() {
   const dispatch = useDispatch();
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect( () => {
-    dispatch(maintainSessionThunk()).then( () => setIsLoaded(true) );
+    setIsLoaded(false);
+    dispatch(maintainSessionThunk())
+      .then( () => {setIsLoaded(true)} );
   }, [dispatch]);
 
   return (
     <>
-      <Navigation isLoaded={isLoaded} />
-      {isLoaded && (
+    {isLoaded && (
         <Switch>
           <Route exact path="/">
+            <Navigation isLoaded={isLoaded} />
             <SplashPage />
           </Route>
-          <Route exact path="/groups/new">
-            <GroupStart />
-          </Route>
-          <Route path="/groups/:id">
-            <GroupDetails />
-          </Route>
-          <Route path="/groups/:id/edit">
-            <GroupManage />
-          </Route>
-          <Route path="/groups">
-            <GroupsList />
-          </Route>
-          <Route path="/events">
-            <EventsList />
+          <Route>
+            <Navigation isLoaded={isLoaded} />
+            <Route exact path="/groups/new">
+              <GroupStart />
+            </Route>
+            <Route path="/groups/:id">
+              <GroupDetails />
+            </Route>
+            <Route path="/groups/:id/edit">
+              <GroupManage />
+            </Route>
+            <Route exact path="/groups">
+              <GroupsList />
+            </Route>
+            <Route exact path="/events">
+              <EventsList />
+            </Route>
           </Route>
         </Switch>
       )}
-  </>
+    </>
   );
 };
 

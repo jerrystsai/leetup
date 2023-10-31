@@ -44,6 +44,8 @@ export const removeGroup = (deletedGroupId) => ({
 export const loadGroupThunk = (groupId) => async (dispatch) => {
   const responseJSON = await fetch(`/api/groups/${groupId}`);
 
+  console.log('HERE AT LOAD GROUP THUNK id=', groupId);
+
   if (responseJSON.ok) {
     const group = await responseJSON.json();
     dispatch(loadGroup(group));
@@ -148,11 +150,13 @@ const groupsReducer = (state = initialState, action) => {
 
   switch (action.type) {
     case LOAD_GROUP:
+      console.log('HERE AT LOAD_GROUP');
       return {
         ...newState,
         groupDetails: { ...newState.groupDetail, [action.payload.id]: action.payload }
       };
     case LOAD_GROUPS:
+      console.log('HERE AT LOAD_GROUPS');
       const groupDescrips = {};
       action.payload.forEach((group) => {
         groupDescrips[group.id] = group;
@@ -160,6 +164,7 @@ const groupsReducer = (state = initialState, action) => {
       newState.groupDescrips = groupDescrips;
       return newState;
     case LOAD_GROUP_EVENTS:
+      console.log('HERE AT LOAD_GROUP_EVENTS');
       return {
         ...newState,
         groupEvents: { ...newState.groupEvents, [action.payload.id]: action.payload.events }
