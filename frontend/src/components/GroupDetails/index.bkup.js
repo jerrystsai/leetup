@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
 import { loadGroupThunk, loadGroupEventsThunk } from '../../store/groups';
-import EventDescription from '../EventDescription';
 
 const GroupDetails = () => {
   const dispatch = useDispatch();
@@ -29,7 +28,25 @@ const GroupDetails = () => {
   }
 
   let details, openness;
+  if (isLoaded) {
+    details = groupDetails[Number(id)];
+    details.openness = (details.private === true ? 'private' : 'public');
+  }
+
   let events, upcomingEvents, pastEvents;
+  if (isLoaded) {
+    const events = groupEvents ? groupEvents[id] : [];
+    console.log('Events', events);
+    const upcomingEvents = events.filter( event => new Date(event.startDate) > currentDateTime);
+    const pastEvents = events.filter( event => new Date(event.startDate) <= currentDateTime);
+
+    const checkIt = events.map( event => {console.log('startDate', event.startDate)} );
+
+    console.log(events.length, currentDateTime, upcomingEvents.length, pastEvents.length);
+    console.log('startDates', typeof events[0].startDate, typeof events[1].startDate);
+    console.log('startDates', events[0].startDate, events[1].startDate);
+    console.log('pastEvents[0]', pastEvents[0]);
+  }
 
   useEffect( () => {
     setIsLoaded(false);
@@ -38,23 +55,11 @@ const GroupDetails = () => {
       .then( () => {setIsLoaded(true)} );
   }, [dispatch, id]);
 
-  if (isLoaded) {
-    details = groupDetails[Number(id)];
-    details.openness = (details.private === true ? 'private' : 'public');
+  console.log('groupDetails', groupDetails);
 
-    const events = groupEvents ? groupEvents[id] : [];
-    for (let event of events) {
-      event.startDateLiteral = new Date(event.startDate)
-      event.venueStr = event.Venue ? `${event.Venue.city}, ${event.Venue.state}` : `virtual`;
-    }
-    console.log('events', events);
-
-    const upcomingEvents = events.filter( event => new Date(event.startDate) > currentDateTime);
-    upcomingEvents.sort( (a, b) =>  new Date(a.startDate) - new Date(b.startDate) )
-    const pastEvents = events.filter( event => new Date(event.startDate) <= currentDateTime);
-    pastEvents.sort( (a, b) => new Date(b.startDate) - new Date(a.startDate) )
-
-    return (
+  return (
+    <>
+      { isLoaded && (
       <>
         <div className="details-heading"></div>
           <div className="details-heading-left">
@@ -77,53 +82,22 @@ const GroupDetails = () => {
           <h4>{details.about}</h4>
           <h4>{upcomingEvents}</h4>
         </div>
-        { upcomingEvents.length > 0 && (
-          <div className="details-events">
-            <h3>Upcoming Events {`(${upcomingEvents.length})`}</h3>
-            <h4>
-              {
-              Object.values(upcomingEvents).map( event =>
-              <EventDescription
-                  key={event.id}
-                  id={event.id}
-                  previewImage={event.previewImage}
-                  startDate={event.startDate}
-                  name={event.name}
-                  description={event.description}
-                  venueStr={event.venueStr} />
-              )}
-            </h4>
-          </div>
-        )}
-        { pastEvents.length > 0 && (
-          <div className="details-events">
-            <h3>Past Events {`(${pastEvents.length})`}</h3>
-            <h4>
-              {
-              Object.values(pastEvents).map( event =>
-              <EventDescription
-                  key={event.id}
-                  id={event.id}
-                  previewImage={event.previewImage}
-                  startDate={event.startDate}
-                  name={event.name}
-                  description={event.description}
-                  venueStr={event.venueStr} />
-              )}
-            </h4>
-          </div>
-        )}
       </>
-    )
-  };
-
-  return (
-  <>
-    <h3>Group Details are loading...</h3>
-  </>
-)
-
-}
-
+      )}
+      { isLoaded && upcomingEvents && upcomingEvents.length > 0 && (
+        <div className="details-events">
+          <h3>Upcoming Events</h3>
+          <h4>{upcomingEvents[0]}</h4>
+        </div>
+      )}
+      { isLoaded && pastEvents && pastEvents.length > 0 && (
+        <div className="details-events">
+          <h3>Past Events</h3>
+          <h4>{pastEvents}</h4>
+        </div>
+      )}
+    </>
+  )
+};
 
 export default GroupDetails;

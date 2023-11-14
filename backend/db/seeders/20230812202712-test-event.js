@@ -28,8 +28,8 @@ module.exports = {
         type: 'Online',
         capacity: 30,
         price: 0,
-        startDate: '2021-11-19 20:00:00',
-        endDate: '2021-11-19 22:00:00',
+        startDate: '2021-11-18 20:00:00',
+        endDate: '2021-11-18 22:00:00',
       },
       {
         groupId: 1,

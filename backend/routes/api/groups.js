@@ -517,7 +517,7 @@ router.get('/:groupId/events', async (req, res) => {
         }
       ],
       attributes: {
-        exclude: ['description', 'capacity', 'price']
+        exclude: ['capacity', 'price']
       },
       where: { groupId }
     });
