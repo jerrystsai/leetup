@@ -7,6 +7,8 @@ import OpenModalButton from "../OpenModalButton";
 import LoginFormModal from '../LoginFormModal';
 import SignupFormModal from '../SignupFormModal';
 
+import logo from './leetup-logo.png';
+
 const Navigation = ( { isLoaded } ) => {
 
   const sessionUser = useSelector( state => state.session.user );
@@ -37,7 +39,7 @@ const Navigation = ( { isLoaded } ) => {
   return (
     <div className="nav">
       <div className="nav-logo">
-        <NavLink exact to="/"><img src="./images/leetup-logo.png" alt="Leetup Home" height="30px" /></NavLink>
+        <NavLink exact to="/"><img src={logo} alt="Leetup Home" height="30px" /></NavLink>
       </div>
       {isLoaded && sessionLinks}
     </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, NavLink } from 'react-router-dom';
 import { loadGroupThunk, loadGroupEventsThunk } from '../../store/groups';
 import EventDescription from '../EventDescription';
 
@@ -58,7 +58,7 @@ const GroupDetails = () => {
       <>
         <div className="details-heading"></div>
           <div className="details-heading-left">
-            <div className="details-breadcrumb"></div>
+            <div className="details-breadcrumb"><NavLink to="/groups">Groups</NavLink></div>
             <div className="details-image"></div>
           </div>
           <div className="details-heading-right">
@@ -118,12 +118,11 @@ const GroupDetails = () => {
   };
 
   return (
-  <>
-    <h3>Group Details are loading...</h3>
-  </>
-)
-
-}
+    <>
+      <h3>Group Details are loading...</h3>
+    </>
+  )
+};
 
 
 export default GroupDetails;

@@ -29,6 +29,7 @@ const router = express.Router();
 // ROUTE HANDLING
 //
 
+// Delete an Image for an Event
 router.delete('/:eventId/images/:imageId', requireAuth, async (req, res) => {
   const { eventId, imageId } = req.params;
   const userId = +req.user.id;
@@ -502,7 +503,7 @@ router.get('/:eventId', async (req, res) => {
   include: [
       {
         model: Group,
-        attributes: ['id', 'name', 'private', 'city', 'state'],
+        attributes: ['id', 'name', 'private', 'city', 'state', 'organizerId'],
       },
       {
         model: Venue,
@@ -518,6 +519,8 @@ router.get('/:eventId', async (req, res) => {
   if (selectedEvent) {
     // Get numAttending
     selectedEvent['numAttending'] = selectedEventAttendeeCount.length;
+    const hostId = selectedEvent['Group']['organizerId'];
+    selectedEvent['Host'] = await User.findByPk(hostId);
 
     // Get Images
     const eventImages = await Image.findAll(
